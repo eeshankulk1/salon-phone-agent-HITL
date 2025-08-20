@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { Search, BookOpen } from 'lucide-react';
 import { KnowledgeBaseEntry } from '../types';
 import { useKnowledgeBase } from '../hooks/useKnowledgeBase';
+import KnowledgeBaseCard from '../components/KnowledgeBase/KnowledgeBaseCard';
 
 const KnowledgeBase: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const { entries, loading, error, search } = useKnowledgeBase();
+  const { entries, loading, error, search, updateEntry, deleteEntry } = useKnowledgeBase();
 
   const categories = ['All Categories', 'Security', 'Operations'];
 
@@ -22,14 +23,6 @@ const KnowledgeBase: React.FC = () => {
       entry.categories?.includes(selectedCategory.toLowerCase());
     return matchesCategory;
   });
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    });
-  };
 
   if (loading) {
     return (
@@ -91,35 +84,12 @@ const KnowledgeBase: React.FC = () => {
       <div className="space-y-6">
         {filteredEntries.length > 0 ? (
           filteredEntries.map((entry) => (
-            <div key={entry.id} className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {entry.question_text_example}
-                </h3>
-                <span className="text-sm text-gray-500">
-                  {formatDate(entry.created_at)}
-                </span>
-              </div>
-              
-              <div className="prose prose-sm max-w-none">
-                <p className="text-gray-700 leading-relaxed">
-                  {entry.answer_text}
-                </p>
-              </div>
-
-              {entry.categories && entry.categories.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {entry.categories.map((category) => (
-                    <span
-                      key={category}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                    >
-                      {category}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+            <KnowledgeBaseCard
+              key={entry.id}
+              entry={entry}
+              onUpdate={updateEntry}
+              onDelete={deleteEntry}
+            />
           ))
         ) : (
           <div className="text-center py-12">

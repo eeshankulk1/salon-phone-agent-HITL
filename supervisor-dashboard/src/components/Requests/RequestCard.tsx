@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Clock, User, MessageSquare, ChevronDown, ChevronRight, Phone, Calendar } from 'lucide-react';
-import { HelpRequest, RequestPriority } from '../../types';
+import { HelpRequest } from '../../types';
 
 interface RequestCardProps {
   request: HelpRequest;
@@ -30,19 +30,6 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onViewDetails, onRes
       hour: '2-digit',
       minute: '2-digit'
     });
-  };
-
-  const getPriorityColor = (priority?: RequestPriority) => {
-    switch (priority) {
-      case 'HIGH':
-        return 'bg-red-100 text-red-800';
-      case 'MEDIUM':
-        return 'bg-orange-100 text-orange-800';
-      case 'LOW':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
   };
 
   const getStatusColor = (status: string) => {
@@ -77,11 +64,6 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onViewDetails, onRes
             <h3 className="text-lg font-medium text-gray-900 mb-2">{request.question_text}</h3>
             
             <div className="flex items-center space-x-3">
-              {request.priority && (
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(request.priority)}`}>
-                  {request.priority}
-                </span>
-              )}
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                 {request.status.replace('_', ' ').toUpperCase()}
               </span>

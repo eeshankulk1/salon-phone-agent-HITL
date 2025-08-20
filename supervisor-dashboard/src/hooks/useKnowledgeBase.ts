@@ -9,6 +9,8 @@ interface UseKnowledgeBaseReturn {
   error: string | null;
   refetch: () => Promise<void>;
   search: (query: string) => void;
+  updateEntry: (updatedEntry: KnowledgeBaseEntry) => void;
+  deleteEntry: (entryId: string) => void;
 }
 
 export const useKnowledgeBase = (): UseKnowledgeBaseReturn => {
@@ -43,6 +45,22 @@ export const useKnowledgeBase = (): UseKnowledgeBaseReturn => {
     setSearchQuery(query.trim());
   }, []);
 
+  // Update an entry in local state
+  const updateEntry = useCallback((updatedEntry: KnowledgeBaseEntry) => {
+    setAllEntries(prevEntries => 
+      prevEntries.map(entry => 
+        entry.id === updatedEntry.id ? updatedEntry : entry
+      )
+    );
+  }, []);
+
+  // Delete an entry from local state
+  const deleteEntry = useCallback((entryId: string) => {
+    setAllEntries(prevEntries => 
+      prevEntries.filter(entry => entry.id !== entryId)
+    );
+  }, []);
+
   // Filter entries locally based on search query
   const filteredEntries = useMemo(() => {
     if (!searchQuery) {
@@ -73,5 +91,7 @@ export const useKnowledgeBase = (): UseKnowledgeBaseReturn => {
     error,
     refetch,
     search,
+    updateEntry,
+    deleteEntry,
   };
 }; 

@@ -34,4 +34,9 @@ export const updateKnowledgeBaseEntry = async (
   }
 ): Promise<KnowledgeBaseEntry> => {
   return apiClient.put<KnowledgeBaseEntry>(`/knowledge-base/${id}`, data);
+};
+
+// Delete a knowledge base entry
+export const deleteKnowledgeBaseEntry = async (id: string): Promise<{ message: string }> => {
+  return apiClient.delete<{ message: string }>(`/knowledge-base/${id}`);
 }; 

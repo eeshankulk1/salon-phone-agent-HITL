@@ -158,6 +158,21 @@ def update_kb(entry_id: str, data: dict) -> Optional[KnowledgeBaseEntry]:
     finally:
         session.close() 
 
+
+def delete_kb(entry_id: str) -> bool:
+    """Delete a knowledge base entry"""
+    session = SessionLocal()
+    try:
+        kb_entry = session.query(KnowledgeBaseEntry).filter(KnowledgeBaseEntry.id == entry_id).first()
+        if not kb_entry:
+            return False
+        
+        session.delete(kb_entry)
+        session.commit()
+        return True
+    finally:
+        session.close()
+
 def search_kb_by_embedding(query_vec: List[float], k: int = 5) -> List[dict]:
     """
     Vector KNN over knowledge_base using pgvector cosine distance, via SQLAlchemy's Vector comparator API.
