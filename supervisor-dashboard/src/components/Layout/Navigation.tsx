@@ -11,8 +11,8 @@ interface NavigationProps {
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     { key: 'dashboard' as TabKey, label: 'Handle Requests', icon: MessageSquare },
-    { key: 'history' as TabKey, label: 'History', icon: History },
     { key: 'knowledge-base' as TabKey, label: 'Knowledge Base', icon: BookOpen },
+    { key: 'history' as TabKey, label: 'History', icon: History },
   ];
 
   return (

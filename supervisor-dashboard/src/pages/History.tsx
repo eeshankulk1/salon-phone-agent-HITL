@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { History as HistoryIcon, Filter } from 'lucide-react';
 import RequestCard from '../components/Requests/RequestCard';
 import { HelpRequest } from '../types';
-import { mockRequests } from '../data/mockData';
+import { useAllHelpRequests } from '../hooks/useHelpRequests';
 
 const History: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const { requests, loading, error } = useAllHelpRequests();
 
   const statusOptions = [
     { value: 'all', label: 'All Requests' },
@@ -16,20 +17,36 @@ const History: React.FC = () => {
   ];
 
   const filteredRequests = statusFilter === 'all' 
-    ? mockRequests
-    : mockRequests.filter(req => req.status === statusFilter);
+    ? requests
+    : requests.filter(req => req.status === statusFilter);
 
   const sortedRequests = [...filteredRequests].sort((a, b) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
-  const resolvedCount = mockRequests.filter(req => req.status === 'resolved').length;
-  const totalCount = mockRequests.length;
+  const resolvedCount = requests.filter(req => req.status === 'resolved').length;
+  const totalCount = requests.length;
 
   const handleViewDetails = (request: HelpRequest) => {
     console.log('View details for request:', request.id);
     // Could open a details modal here
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-lg text-gray-500">Loading request history...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-lg text-red-500">Error loading request history: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div>

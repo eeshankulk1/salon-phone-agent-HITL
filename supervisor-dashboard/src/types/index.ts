@@ -30,6 +30,7 @@ export interface HelpRequest {
   expires_at: string;
   resolved_at?: string;
   cancel_reason?: string;
+  answer_text?: string;
   customer?: Customer;
 }
 
