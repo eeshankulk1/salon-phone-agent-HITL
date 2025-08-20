@@ -161,6 +161,3 @@ class TestKnowledgeBaseRoutes:
         response = client.post("/api/knowledge-base", json=kb_data)
         assert response.status_code == 500
         assert "API rate limit exceeded" in response.json()["detail"]
-
-    # Note: test_resolve_help_request_flow removed due to SQLite Vector incompatibility
-    # This test would require PostgreSQL with pgvector extension to work properly 

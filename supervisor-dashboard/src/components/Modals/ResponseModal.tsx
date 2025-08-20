@@ -7,14 +7,21 @@ interface ResponseModalProps {
   onClose: () => void;
   request: HelpRequest | null;
   onSubmit: (response: string) => void;
+  isSubmitting?: boolean;
 }
 
-const ResponseModal: React.FC<ResponseModalProps> = ({ isOpen, onClose, request, onSubmit }) => {
+const ResponseModal: React.FC<ResponseModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  request, 
+  onSubmit, 
+  isSubmitting = false 
+}) => {
   const [response, setResponse] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (response.trim()) {
+    if (response.trim() && !isSubmitting) {
       onSubmit(response);
       setResponse('');
       onClose();
@@ -31,6 +38,7 @@ const ResponseModal: React.FC<ResponseModalProps> = ({ isOpen, onClose, request,
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
+            aria-label="Close modal"
           >
             <X size={24} />
           </button>
@@ -76,11 +84,11 @@ const ResponseModal: React.FC<ResponseModalProps> = ({ isOpen, onClose, request,
               </button>
               <button
                 type="submit"
-                disabled={!response.trim()}
+                disabled={!response.trim() || isSubmitting}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
               >
                 <Send size={16} />
-                <span>Send Response</span>
+                <span>{isSubmitting ? 'Sending...' : 'Send Response'}</span>
               </button>
             </div>
           </form>

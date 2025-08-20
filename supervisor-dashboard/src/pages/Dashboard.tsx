@@ -1,27 +1,19 @@
 import React, { useState } from 'react';
-import { Clock, AlertCircle, CheckCircle } from 'lucide-react';
-import StatCard from '../components/Dashboard/StatCard';
-import RequestCard from '../components/Requests/RequestCard';
+import StatsGrid from '../components/Dashboard/StatsGrid';
+import PendingRequestsSection from '../components/Requests/PendingRequestsSection';
 import ResponseModal from '../components/Modals/ResponseModal';
+import Notification from '../components/UI/Notification';
 import { HelpRequest } from '../types';
 import { useAllHelpRequests } from '../hooks/useHelpRequests';
+import { resolveHelpRequest } from '../services/helpRequests';
+import { notificationConfig } from '../styles/notifications';
 
 const HandleRequests: React.FC = () => {
   const [selectedRequest, setSelectedRequest] = useState<HelpRequest | null>(null);
   const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
-  const { requests, stats, loading, error } = useAllHelpRequests();
-
-  const pendingRequests = requests.filter(req => req.status === 'pending');
-  const inProgressRequests = requests.filter(req => req.status === 'in_progress');
-  const resolvedTodayRequests = requests.filter(req => 
-    req.status === 'resolved' && 
-    new Date(req.created_at).toDateString() === new Date().toDateString()
-  );
-
-  // Sort pending requests by created_at in descending order (newest first)
-  const sortedPendingRequests = [...pendingRequests].sort((a, b) => 
-    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { requests, stats, loading, error, refetch } = useAllHelpRequests();
 
   const handleViewDetails = (request: HelpRequest) => {
     setSelectedRequest(request);
@@ -33,9 +25,40 @@ const HandleRequests: React.FC = () => {
     setIsResponseModalOpen(true);
   };
 
-  const handleSubmitResponse = (response: string) => {
-    console.log('Submitted response:', response, 'for request:', selectedRequest?.id);
-    // In a real app, this would make an API call to submit the response
+  const handleSubmitResponse = async (response: string) => {
+    if (!selectedRequest) return;
+    
+    setIsSubmitting(true);
+    try {
+      await resolveHelpRequest(selectedRequest.id, {
+        answer_text: response,
+        responder_id: 'supervisor-1' // TODO: Replace with actual user ID from auth context
+      });
+      
+      // Show success notification
+      setNotification({
+        message: 'Request resolved successfully and knowledge base entry created!',
+        type: 'success'
+      });
+      
+      // Refresh the data to show updated status
+      await refetch();
+      
+      // Auto-close notification after configured duration
+      setTimeout(() => setNotification(null), notificationConfig.successDuration);
+      
+    } catch (error) {
+      console.error('Error resolving help request:', error);
+      setNotification({
+        message: 'Failed to resolve request. Please try again.',
+        type: 'error'
+      });
+      
+      // Auto-close error notification after configured duration
+      setTimeout(() => setNotification(null), notificationConfig.errorDuration);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -57,53 +80,14 @@ const HandleRequests: React.FC = () => {
   return (
     <div>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatCard
-          title="Pending Requests"
-          count={stats.pending}
-          description="Awaiting response"
-          icon={Clock}
-          iconColor="bg-orange-500"
-        />
-        <StatCard
-          title="In Progress"
-          count={stats.in_progress}
-          description="Being processed"
-          icon={AlertCircle}
-          iconColor="bg-blue-500"
-        />
-        <StatCard
-          title="Resolved Today"
-          count={resolvedTodayRequests.length}
-          description="Completed requests"
-          icon={CheckCircle}
-          iconColor="bg-green-500"
-        />
-      </div>
+      <StatsGrid stats={stats} requests={requests} />
 
       {/* Pending Requests Section */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Pending Requests</h2>
-          <span className="text-sm text-gray-500">{pendingRequests.length} total</span>
-        </div>
-        <div className="space-y-4">
-          {sortedPendingRequests.length > 0 ? (
-            sortedPendingRequests.map((request) => (
-              <RequestCard
-                key={request.id}
-                request={request}
-                onViewDetails={handleViewDetails}
-                onRespond={handleRespond}
-              />
-            ))
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              No pending requests
-            </div>
-          )}
-        </div>
-      </div>
+      <PendingRequestsSection
+        requests={requests}
+        onViewDetails={handleViewDetails}
+        onRespond={handleRespond}
+      />
 
       {/* Response Modal */}
       <ResponseModal
@@ -111,7 +95,17 @@ const HandleRequests: React.FC = () => {
         onClose={() => setIsResponseModalOpen(false)}
         request={selectedRequest}
         onSubmit={handleSubmitResponse}
+        isSubmitting={isSubmitting}
       />
+      
+      {/* Notification */}
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 };
