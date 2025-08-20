@@ -1,5 +1,7 @@
 from database import crud
 from .knowledge_base import create_knowledge_base_from_text
+from datetime import datetime, timezone, timedelta
+import uuid
 
 def resolve_hr_and_create_kb(request_id: str, answer_text: str, responder_id: str):
     """
@@ -40,3 +42,41 @@ def resolve_hr_and_create_kb(request_id: str, answer_text: str, responder_id: st
     )
 
     return resolved, supervisor_response
+
+
+def create_help_request_for_escalation(question_text: str, customer_id: str = None, call_id: str = None):
+    """
+    Create a help request for escalation when knowledge base search fails.
+    
+    Args:
+        question_text: The customer's question that needs escalation
+        customer_id: Optional customer ID (defaults to a placeholder if not available)
+        call_id: Optional call ID for the current call
+    
+    Returns:
+        Created help request object or None if creation fails
+    """
+    # Default expiration: 24 hours from now
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+    
+    # Require valid customer_id; convert string to UUID if needed
+    if isinstance(customer_id, str):
+        try:
+            customer_id = uuid.UUID(customer_id)
+        except ValueError:
+            print(f"Invalid customer_id format: {customer_id}")
+            return None
+    
+    help_request_data = {
+        "customer_id": customer_id,
+        "question_text": question_text,
+        "expires_at": expires_at,
+        "status": "pending"
+    }
+    
+    # Add call_id if provided
+    if call_id:
+        help_request_data["call_id"] = call_id
+    
+    return crud.create_help_request(help_request_data)
+
