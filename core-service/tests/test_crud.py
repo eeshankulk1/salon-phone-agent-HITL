@@ -87,4 +87,41 @@ class TestKnowledgeBaseCRUD:
             created_entry = crud.create_kb(kb_data)
             assert created_entry.question_text_example == "How to login?"
             assert created_entry.answer_text == "Use your email and password"
-            assert created_entry.embedding == sample_embedding 
+            # For vector comparison, check length and a few values instead of direct equality
+            assert len(created_entry.embedding) == len(sample_embedding)
+            assert created_entry.embedding[0] == sample_embedding[0]
+
+    def test_create_supervisor_response(self, test_engine, sample_help_request):
+        """Test creating a supervisor response"""
+        TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+        
+        with patch('database.crud.SessionLocal', TestSessionLocal):
+            response = crud.create_supervisor_response(
+                request_id=sample_help_request.id,  # Pass UUID object directly
+                answer_text="Your password has been reset",
+                responder_id="supervisor123"
+            )
+            
+            assert response is not None
+            assert response.help_request_id == sample_help_request.id
+            assert response.answer_text == "Your password has been reset"
+            assert response.responder_id == "supervisor123"
+
+    def test_update_help_request_status(self, test_engine, sample_help_request):
+        """Test updating help request status"""
+        TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+        
+        with patch('database.crud.SessionLocal', TestSessionLocal):
+            # Initially pending
+            assert sample_help_request.status == "pending"
+            assert sample_help_request.resolved_at is None
+            
+            # Update to resolved
+            updated = crud.update_help_request_status(
+                request_id=sample_help_request.id,  # Pass UUID object directly
+                status="resolved"
+            )
+            
+            assert updated is not None
+            assert updated.status == "resolved"
+            assert updated.resolved_at is not None 

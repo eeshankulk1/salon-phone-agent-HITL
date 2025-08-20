@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
 from ..schemas.knowledge_base import KnowledgeBaseOut, KnowledgeBaseCreate, KnowledgeBaseUpdate
-from ..services.embeddings import embed_question
 from database import crud
+from ..services.knowledge_base import create_knowledge_base_from_text
 
 router = APIRouter()
 
@@ -38,15 +38,11 @@ def create_knowledge_base_entry(kb_entry: KnowledgeBaseCreate):
     """Create a new knowledge base entry"""
     try:
         # Convert categories list to comma-separated string if needed
-        kb_data = kb_entry.model_dump()
-        # For now, ignore categories since we're keeping the model simple
-        kb_data.pop('categories', None)
-        
-        # Generate embedding for the question text
-        embedding = embed_question(kb_entry.question_text_example)
-        kb_data['embedding'] = embedding
-        
-        created_entry = crud.create_kb(kb_data)
+        created_entry = create_knowledge_base_from_text(
+            question=kb_entry.question_text_example,
+            answer=kb_entry.answer_text,
+            source_help_request_id=kb_entry.source_help_request_id,
+        )
         return _kb_entry_to_out(created_entry)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

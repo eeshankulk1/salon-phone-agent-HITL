@@ -3,7 +3,7 @@ from typing import List, Optional
 from ..schemas.help_request import HelpRequestOut, HelpRequestCreate, HelpRequestResolve
 from database import crud
 from database.models import SupervisorResponse
-
+from ..services.help_requests import resolve_hr_and_create_kb
 router = APIRouter()
 
 
@@ -51,7 +51,7 @@ def list_help_requests(
 def create_help_request(help_request: HelpRequestCreate):
     """Create a new help request"""
     try:
-        help_request_data = help_request.dict()
+        help_request_data = help_request.model_dump()
         created_request = crud.create_help_request(help_request_data)
         return _help_request_to_out(created_request)
     except Exception as e:
@@ -60,26 +60,14 @@ def create_help_request(help_request: HelpRequestCreate):
 
 @router.post("/{request_id}/resolve", response_model=HelpRequestOut)
 def resolve_help_request(request_id: str, resolve_data: HelpRequestResolve):
-    """Resolve a help request with an answer"""
-    try:
-        resolved_request = crud.resolve_help_request(
-            request_id=request_id,
-            answer_text=resolve_data.answer_text,
-            responder_id=resolve_data.responder_id
-        )
-        
-        if not resolved_request:
-            raise HTTPException(status_code=404, detail="Help request not found")
-        
-        # Get the supervisor response to include answer_text
-        result = crud.get_help_request_with_answer(request_id)
-        supervisor_response = result["supervisor_response"] if result else None
-        
-        return _help_request_to_out(resolved_request, supervisor_response)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    resolved, supervisor_response = resolve_hr_and_create_kb(
+        request_id=request_id,
+        answer_text=resolve_data.answer_text,
+        responder_id=resolve_data.responder_id,
+    )
+    if not resolved:
+        raise HTTPException(status_code=404, detail="Help request not found")
+    return _help_request_to_out(resolved, supervisor_response)
 
 
 @router.get("/{request_id}", response_model=HelpRequestOut)
