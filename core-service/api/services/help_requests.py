@@ -31,10 +31,6 @@ def resolve_hr_and_create_kb(request_id: str, answer_text: str, responder_id: st
         question=question_text,
         answer=supervisor_response.answer_text,  # Use data from supervisor response
         source_help_request_id=request_id,
-        metadata={
-            "source": "help_request.resolve",
-            "responder_id": supervisor_response.responder_id
-        },
     )
 
     # 4) Update help request status to resolved

@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
 import { Search, BookOpen } from 'lucide-react';
 import { KnowledgeBaseEntry } from '../types';
-import { mockKnowledgeBase } from '../data/mockData';
+import { useKnowledgeBase } from '../hooks/useKnowledgeBase';
 
 const KnowledgeBase: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const { entries, loading, error, search } = useKnowledgeBase();
 
   const categories = ['All Categories', 'Security', 'Operations'];
 
-  const filteredEntries = mockKnowledgeBase.filter(entry => {
-    const matchesSearch = searchTerm === '' || 
-      entry.question_text_example.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.answer_text.toLowerCase().includes(searchTerm.toLowerCase());
-    
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    search(value); // Immediate local search
+  };
+
+  const filteredEntries = entries.filter(entry => {
     const matchesCategory = selectedCategory === 'All Categories' || 
       entry.categories?.includes(selectedCategory.toLowerCase());
-
-    return matchesSearch && matchesCategory;
+    return matchesCategory;
   });
 
   const formatDate = (dateString: string) => {
@@ -27,6 +30,22 @@ const KnowledgeBase: React.FC = () => {
       day: '2-digit'
     });
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-lg text-gray-500">Loading knowledge base...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-lg text-red-500">Error loading knowledge base: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -46,7 +65,7 @@ const KnowledgeBase: React.FC = () => {
               type="text"
               placeholder="Search knowledge base..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>

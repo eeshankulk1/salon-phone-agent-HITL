@@ -4,12 +4,13 @@ import Navigation from './components/Layout/Navigation';
 import HandleRequests from './pages/Dashboard';
 import History from './pages/History';
 import KnowledgeBase from './pages/KnowledgeBase';
-import { mockStats } from './data/mockData';
+import { useAllHelpRequests } from './hooks/useHelpRequests';
 
 type TabKey = 'dashboard' | 'history' | 'knowledge-base';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('dashboard');
+  const { stats } = useAllHelpRequests();
 
   const renderContent = () => {
     switch (activeTab) {
@@ -26,7 +27,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header stats={mockStats} />
+      <Header stats={stats} />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="max-w-7xl mx-auto px-6 py-8">
         {renderContent()}

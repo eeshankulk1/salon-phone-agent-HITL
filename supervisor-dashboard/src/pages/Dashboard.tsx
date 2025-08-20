@@ -4,15 +4,16 @@ import StatCard from '../components/Dashboard/StatCard';
 import RequestCard from '../components/Requests/RequestCard';
 import ResponseModal from '../components/Modals/ResponseModal';
 import { HelpRequest } from '../types';
-import { mockRequests } from '../data/mockData';
+import { useAllHelpRequests } from '../hooks/useHelpRequests';
 
 const HandleRequests: React.FC = () => {
   const [selectedRequest, setSelectedRequest] = useState<HelpRequest | null>(null);
   const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
+  const { requests, stats, loading, error } = useAllHelpRequests();
 
-  const pendingRequests = mockRequests.filter(req => req.status === 'pending');
-  const inProgressRequests = mockRequests.filter(req => req.status === 'in_progress');
-  const resolvedTodayRequests = mockRequests.filter(req => 
+  const pendingRequests = requests.filter(req => req.status === 'pending');
+  const inProgressRequests = requests.filter(req => req.status === 'in_progress');
+  const resolvedTodayRequests = requests.filter(req => 
     req.status === 'resolved' && 
     new Date(req.created_at).toDateString() === new Date().toDateString()
   );
@@ -37,20 +38,36 @@ const HandleRequests: React.FC = () => {
     // In a real app, this would make an API call to submit the response
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-lg text-gray-500">Loading requests...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-lg text-red-500">Error loading requests: {error}</div>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard
           title="Pending Requests"
-          count={pendingRequests.length}
+          count={stats.pending}
           description="Awaiting response"
           icon={Clock}
           iconColor="bg-orange-500"
         />
         <StatCard
           title="In Progress"
-          count={inProgressRequests.length}
+          count={stats.in_progress}
           description="Being processed"
           icon={AlertCircle}
           iconColor="bg-blue-500"
