@@ -14,7 +14,6 @@ def _help_request_to_out(help_request, supervisor_response: Optional[SupervisorR
         customer_id=help_request.customer_id,
         question_text=help_request.question_text,
         status=help_request.status,
-        priority="LOW",  # Default as specified
         created_at=help_request.created_at,
         expires_at=help_request.expires_at,
         resolved_at=help_request.resolved_at,

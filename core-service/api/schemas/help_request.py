@@ -9,7 +9,6 @@ class HelpRequestOut(BaseModel):
     customer_id: uuid.UUID
     question_text: str
     status: str
-    priority: str = "LOW"  # Default priority as mentioned in requirements
     created_at: datetime
     expires_at: Optional[datetime] = None
     resolved_at: Optional[datetime] = None
