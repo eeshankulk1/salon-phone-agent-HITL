@@ -8,3 +8,11 @@ pytest==8.3.4
 httpx>=0.24.0
 openai>=1.100.0
 pgvector>=0.4.1
+livekit>=1.0.12
+livekit-agents>=1.0.0
+livekit-plugins-openai>=1.2.6
+livekit-plugins-cartesia>=1.2.6
+livekit-plugins-deepgram>=1.2.6
+livekit-plugins-silero>=1.2.6
+livekit-plugins-turn-detector>=1.2.6
+livekit-plugins-noise-cancellation==0.2.5

@@ -1,9 +1,9 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func
 from datetime import datetime, timezone
 from .session import SessionLocal
-from .models import HelpRequest, KnowledgeBaseEntry, SupervisorResponse
+from .models import HelpRequest, KnowledgeBaseEntry, SupervisorResponse, Customer
 
 
 def get_db_session():
@@ -86,8 +86,6 @@ def update_help_request_status(request_id: str, status: str = "resolved") -> Opt
 
 
 
-
-
 def get_help_request_with_answer(request_id: str) -> Optional[dict]:
     """Get help request with its supervisor response (answer)"""
     session = SessionLocal()
@@ -159,3 +157,53 @@ def update_kb(entry_id: str, data: dict) -> Optional[KnowledgeBaseEntry]:
         return kb_entry
     finally:
         session.close() 
+
+def search_kb_by_embedding(query_vec: List[float], k: int = 5) -> List[dict]:
+    """
+    Vector KNN over knowledge_base using pgvector cosine distance, via SQLAlchemy's Vector comparator API.
+    Returns rows with a 'sim' field (cosine similarity in [0,1]).
+    """
+    session = SessionLocal()
+    try:
+        # Use comparator for clarity; cosine_distance returns distance in [0, 2]
+        distance_expr = KnowledgeBaseEntry.embedding.cosine_distance(query_vec)
+        sim_expr = (1 - distance_expr).label('sim')
+
+        rows = (
+            session.query(
+                KnowledgeBaseEntry.id,
+                KnowledgeBaseEntry.question_text_example,
+                KnowledgeBaseEntry.answer_text,
+                sim_expr,
+            )
+            .filter(or_(KnowledgeBaseEntry.valid_to.is_(None), KnowledgeBaseEntry.valid_to > func.now()))
+            .order_by(distance_expr)
+            .limit(k)
+            .all()
+        )
+        # convert to plain dicts
+        return [
+            {
+                "id": r[0],
+                "question_text_example": r[1],
+                "answer_text": r[2],
+                "sim": float(r[3]),
+            }
+            for r in rows
+        ]
+    finally:
+        session.close()
+
+
+# Customer CRUD
+def create_customer(data: dict) -> Customer:
+    """Create a new customer"""
+    session = SessionLocal()
+    try:
+        customer = Customer(**data)
+        session.add(customer)
+        session.commit()
+        session.refresh(customer)
+        return customer
+    finally:
+        session.close()
