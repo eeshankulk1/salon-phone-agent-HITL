@@ -1,4 +1,5 @@
 import os
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv, find_dotenv
@@ -7,6 +8,12 @@ from api.routes import help_requests, knowledge_base
 
 # Load environment variables from repo root
 load_dotenv(find_dotenv())
+
+# Configure logging to show supervisor communication logs
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 # Create FastAPI app
 app = FastAPI(title="Core Service")

@@ -1,5 +1,6 @@
 from database import crud
 from .knowledge_base import create_knowledge_base_from_text
+from .handle_supervisor_communication import text_supervisor_sync
 from datetime import datetime, timezone, timedelta
 import uuid
 
@@ -78,5 +79,15 @@ def create_help_request_for_escalation(question_text: str, customer_id: str = No
     if call_id:
         help_request_data["call_id"] = call_id
     
-    return crud.create_help_request(help_request_data)
+    # Create the help request
+    help_request = crud.create_help_request(help_request_data)
+    
+    # If help request was created successfully, simulate texting the supervisor
+    if help_request:
+        try:
+            text_supervisor_sync(str(help_request.id))
+        except Exception as e:
+            print(f"Error simulating supervisor text: {e}")
+    
+    return help_request
 
