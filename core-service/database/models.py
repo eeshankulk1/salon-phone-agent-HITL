@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Text, DateTime, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+from pgvector.sqlalchemy import Vector
 from .session import Base
 import uuid
 
@@ -70,8 +71,7 @@ class KnowledgeBaseEntry(Base):
     valid_to = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-    
-    # Note: metadata and embedding fields omitted for simplicity as per user requirements
+    embedding = Column(Vector(1536), nullable=False)  # Store embedding as pgvector for semantic search
 
 
 class Followup(Base):
