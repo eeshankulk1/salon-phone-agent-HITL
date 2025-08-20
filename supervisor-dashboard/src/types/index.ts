@@ -16,7 +16,6 @@ export interface Call {
 }
 
 export type RequestStatus = 'pending' | 'in_progress' | 'resolved' | 'cancelled';
-export type RequestPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 
 export interface HelpRequest {
   id: string;
@@ -25,7 +24,6 @@ export interface HelpRequest {
   question_text: string;
   normalized_key?: string;
   status: RequestStatus;
-  priority?: RequestPriority;
   created_at: string;
   expires_at: string;
   resolved_at?: string;

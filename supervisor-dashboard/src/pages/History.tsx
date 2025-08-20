@@ -91,10 +91,6 @@ const History: React.FC = () => {
                 request={request}
                 onViewDetails={handleViewDetails}
               />
-              {/* Add a subtle indicator for high priority requests */}
-              {request.priority === 'HIGH' && (
-                <div className="absolute top-0 left-0 w-1 h-full bg-red-500 rounded-l-lg"></div>
-              )}
             </div>
           ))
         ) : (
