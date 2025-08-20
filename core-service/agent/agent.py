@@ -14,6 +14,8 @@ from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from agent.tools import search_knowledge_base
 from api.services.customer import create_customer_for_session
 
+import logging
+logger = logging.getLogger("agent")
 
 class Assistant(Agent):
     def __init__(self) -> None:
@@ -42,6 +44,10 @@ async def entrypoint(ctx: agents.JobContext):
         # In production, you might extract phone number from SIP trunk or other metadata
     )
     
+    logger.info("\n" + "="*60 +
+                "\n🚀  CALL HAS BEGUN" +
+                f"\n📞  A customer is now connected to Beauty Palace {customer.display_name}" +
+                "\n" + "="*60)
     
     session = AgentSession(
         stt=deepgram.STT(model="nova-3", language="multi"),
