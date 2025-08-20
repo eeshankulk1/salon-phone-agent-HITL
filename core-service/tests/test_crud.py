@@ -76,11 +76,15 @@ class TestKnowledgeBaseCRUD:
         TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
         
         with patch('database.crud.SessionLocal', TestSessionLocal):
+            # Create proper 1536-dimension embedding vector
+            sample_embedding = [0.1] * 1536
             kb_data = {
                 "question_text_example": "How to login?",
-                "answer_text": "Use your email and password"
+                "answer_text": "Use your email and password",
+                "embedding": sample_embedding
             }
             
             created_entry = crud.create_kb(kb_data)
             assert created_entry.question_text_example == "How to login?"
-            assert created_entry.answer_text == "Use your email and password" 
+            assert created_entry.answer_text == "Use your email and password"
+            assert created_entry.embedding == sample_embedding 

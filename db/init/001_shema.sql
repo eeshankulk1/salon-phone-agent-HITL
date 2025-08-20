@@ -74,8 +74,7 @@ CREATE INDEX IF NOT EXISTS hr_status_created_idx ON help_requests (status, creat
 -- CREATE INDEX IF NOT EXISTS followups_status_idx ON followups (status, created_at);      -- sender worker
 
 -- ANN index for semantic KB search
--- CREATE INDEX IF NOT EXISTS knowledge_base_vec_idx
---   ON knowledge_base
---   USING ivfflat (embedding vector_cosine)
---   WITH (lists = 100)
---   WHERE valid_to IS NULL;
+CREATE INDEX IF NOT EXISTS knowledge_base_vec_idx
+  ON knowledge_base
+  USING ivfflat (embedding vector_cosine)
+  WITH (lists = 100)

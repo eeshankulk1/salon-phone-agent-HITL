@@ -68,9 +68,13 @@ def sample_help_request(test_session, sample_customer):
 @pytest.fixture
 def sample_kb_entry(test_session):
     """Create a sample knowledge base entry for testing"""
+    # Create a sample embedding vector (1536 dimensions for text-embedding-3-small)
+    sample_embedding = [0.1] * 1536  # Simple vector for testing
+    
     kb_entry = KnowledgeBaseEntry(
         question_text_example="How to reset password?",
-        answer_text="Go to settings and click reset password"
+        answer_text="Go to settings and click reset password",
+        embedding=sample_embedding
     )
     test_session.add(kb_entry)
     test_session.commit()

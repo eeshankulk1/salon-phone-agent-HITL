@@ -96,9 +96,14 @@ class TestKnowledgeBaseRoutes:
         assert len(data) == 1
         assert data[0]["question_text_example"] == "How to reset password?"
 
+    @patch('api.services.embeddings.embed_question')
     @patch('database.crud.create_kb')
-    def test_create_knowledge_base_entry(self, mock_create_kb, client):
+    def test_create_knowledge_base_entry(self, mock_create_kb, mock_embed_question, client):
         """Test POST /api/knowledge-base"""
+        # Mock the embedding function with proper 1536-dimension vector
+        sample_embedding = [0.1] * 1536
+        mock_embed_question.return_value = sample_embedding
+        
         # Mock the CRUD function return value
         mock_kb_entry = MagicMock()
         mock_kb_entry.id = uuid.uuid4()
@@ -120,6 +125,15 @@ class TestKnowledgeBaseRoutes:
         data = response.json()
         assert data["question_text_example"] == "How to login?"
         assert data["answer_text"] == "Use your email and password"
+        
+        # Verify that embed_question was called with the correct text
+        mock_embed_question.assert_called_once_with("How to login?")
+        
+        # Verify that create_kb was called with embedding included
+        args, kwargs = mock_create_kb.call_args
+        kb_data_passed = args[0]
+        assert "embedding" in kb_data_passed
+        assert kb_data_passed["embedding"] == sample_embedding
 
     def test_create_knowledge_base_entry_invalid_data(self, client):
         """Test POST /api/knowledge-base with invalid data"""
@@ -129,4 +143,20 @@ class TestKnowledgeBaseRoutes:
         }
         
         response = client.post("/api/knowledge-base", json=kb_data)
-        assert response.status_code == 422  # Validation error 
+        assert response.status_code == 422  # Validation error
+
+    @patch('api.services.embeddings.embed_question')
+    def test_create_knowledge_base_entry_embedding_failure(self, mock_embed_question, client):
+        """Test POST /api/knowledge-base when embedding generation fails"""
+        # Mock embedding function to raise an exception
+        mock_embed_question.side_effect = Exception("API rate limit exceeded")
+        
+        kb_data = {
+            "question_text_example": "How to login?",
+            "answer_text": "Use your email and password",
+            "categories": ["authentication"]
+        }
+        
+        response = client.post("/api/knowledge-base", json=kb_data)
+        assert response.status_code == 500
+        assert "API rate limit exceeded" in response.json()["detail"] 

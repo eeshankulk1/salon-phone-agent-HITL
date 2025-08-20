@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
 from ..schemas.knowledge_base import KnowledgeBaseOut, KnowledgeBaseCreate, KnowledgeBaseUpdate
+from ..services.embeddings import embed_question
 from database import crud
 
 router = APIRouter()
@@ -40,6 +41,10 @@ def create_knowledge_base_entry(kb_entry: KnowledgeBaseCreate):
         kb_data = kb_entry.model_dump()
         # For now, ignore categories since we're keeping the model simple
         kb_data.pop('categories', None)
+        
+        # Generate embedding for the question text
+        embedding = embed_question(kb_entry.question_text_example)
+        kb_data['embedding'] = embedding
         
         created_entry = crud.create_kb(kb_data)
         return _kb_entry_to_out(created_entry)
