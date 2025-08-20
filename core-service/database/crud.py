@@ -1,7 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
-from datetime import datetime
+from datetime import datetime, timezone
 from .session import SessionLocal
 from .models import HelpRequest, KnowledgeBaseEntry, SupervisorResponse
 
@@ -16,8 +16,6 @@ def get_db_session():
 
 
 # Helper functions for categories (list ↔ comma-separated string)
-
-
 
 # Help Requests CRUD
 def list_help_requests(status: Optional[str] = None) -> List[HelpRequest]:
@@ -45,18 +43,14 @@ def create_help_request(data: dict) -> HelpRequest:
         session.close()
 
 
-def resolve_help_request(request_id: str, answer_text: str, responder_id: Optional[str] = None) -> Optional[HelpRequest]:
-    """Resolve a help request by creating a supervisor response and updating status"""
+def create_supervisor_response(request_id: str, answer_text: str, responder_id: Optional[str] = None) -> Optional[SupervisorResponse]:
+    """Create a supervisor response for a help request"""
     session = SessionLocal()
     try:
-        # Get the help request
+        # Verify help request exists
         help_request = session.query(HelpRequest).filter(HelpRequest.id == request_id).first()
         if not help_request:
             return None
-        
-        # Update help request
-        help_request.status = "resolved"
-        help_request.resolved_at = datetime.utcnow()
         
         # Create supervisor response
         response = SupervisorResponse(
@@ -65,12 +59,33 @@ def resolve_help_request(request_id: str, answer_text: str, responder_id: Option
             answer_text=answer_text
         )
         session.add(response)
+        session.commit()
+        session.refresh(response)
+        return response
+    finally:
+        session.close()
+
+
+def update_help_request_status(request_id: str, status: str = "resolved") -> Optional[HelpRequest]:
+    """Update help request status and resolved_at timestamp"""
+    session = SessionLocal()
+    try:
+        help_request = session.query(HelpRequest).filter(HelpRequest.id == request_id).first()
+        if not help_request:
+            return None
+        
+        help_request.status = status
+        if status == "resolved":
+            help_request.resolved_at = datetime.now(timezone.utc)
         
         session.commit()
         session.refresh(help_request)
         return help_request
     finally:
         session.close()
+
+
+
 
 
 def get_help_request_with_answer(request_id: str) -> Optional[dict]:
