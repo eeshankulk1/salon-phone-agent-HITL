@@ -1,6 +1,6 @@
 from ..services.embeddings import embed_question
 from database import crud
-from typing import List, Sequence, Union
+from typing import List, Sequence, Union, Optional, Dict, Any
 
 
 def _normalize_embedding_vector(vector: Union[Sequence[float], Sequence[int], Sequence[Union[float, int]]]) -> List[float]:
@@ -35,6 +35,39 @@ def create_knowledge_base_from_text(question: str, answer: str, source_help_requ
         "embedding": vector_embedding,
     }
     return crud.create_kb(payload)
+
+
+def update_knowledge_base_from_text(entry_id: str, update_data: Dict[str, Any]) -> Optional[Any]:
+    """
+    Update a knowledge base entry with automatic embedding updates.
+    
+    If the question_text_example is being updated, this function will:
+    1. Generate a new embedding for the updated question
+    2. Include the embedding in the update data
+    3. Update the knowledge base entry with all changes
+    
+    Args:
+        entry_id: The ID of the knowledge base entry to update
+        update_data: Dictionary containing the fields to update
+        
+    Returns:
+        Updated KnowledgeBaseEntry or None if not found
+        
+    Raises:
+        Exception: If embedding generation or database update fails
+    """
+    # Create a copy of update_data to avoid modifying the original
+    processed_update_data = update_data.copy()
+    
+    # If question text is being updated, generate new embedding
+    if "question_text_example" in processed_update_data:
+        new_question = processed_update_data["question_text_example"]
+        if new_question:  # Only if the new question is not empty
+            vector_embedding = _normalize_embedding_vector(embed_question(new_question))
+            processed_update_data["embedding"] = vector_embedding
+    
+    # Update the knowledge base entry with all data (including embedding if applicable)
+    return crud.update_kb(entry_id, processed_update_data)
 
 
 def search_knowledge_base_by_question(question: str, k: int = 5, min_sim: float = 0.70):

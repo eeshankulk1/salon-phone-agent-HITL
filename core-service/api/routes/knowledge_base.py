@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
 from ..schemas.knowledge_base import KnowledgeBaseOut, KnowledgeBaseCreate, KnowledgeBaseUpdate
 from database import crud
-from ..services.knowledge_base import create_knowledge_base_from_text
+from ..services.knowledge_base import create_knowledge_base_from_text, update_knowledge_base_from_text
 
 router = APIRouter()
 
@@ -50,13 +50,14 @@ def create_knowledge_base_entry(kb_entry: KnowledgeBaseCreate):
 
 @router.put("/{entry_id}", response_model=KnowledgeBaseOut)
 def update_knowledge_base_entry(entry_id: str, kb_update: KnowledgeBaseUpdate):
-    """Update a knowledge base entry"""
+    """Update a knowledge base entry with automatic embedding updates"""
     try:
         # Filter out None values and categories for now
         update_data = {k: v for k, v in kb_update.dict().items() if v is not None}
         update_data.pop('categories', None)  # Remove categories for now
         
-        updated_entry = crud.update_kb(entry_id, update_data)
+        # Use the service function that handles embedding updates
+        updated_entry = update_knowledge_base_from_text(entry_id, update_data)
         if not updated_entry:
             raise HTTPException(status_code=404, detail="Knowledge base entry not found")
         
@@ -80,6 +81,21 @@ def get_knowledge_base_entry(entry_id: str):
             raise HTTPException(status_code=404, detail="Knowledge base entry not found")
         
         return _kb_entry_to_out(entry)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{entry_id}")
+def delete_knowledge_base_entry(entry_id: str):
+    """Delete a knowledge base entry by ID"""
+    try:
+        deleted = crud.delete_kb(entry_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Knowledge base entry not found")
+        
+        return {"message": "Knowledge base entry deleted successfully"}
     except HTTPException:
         raise
     except Exception as e:
