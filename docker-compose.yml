@@ -28,5 +28,39 @@ services:
       postgres:
         condition: service_healthy
 
+  expiry-job:
+    image: postgres:16
+    container_name: salon-expiry-job
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    command: >
+      bash -lc 'while true; do
+        echo "[expiry-job] $(date -u +"%Y-%m-%dT%H:%M:%SZ") running...";
+        PGPASSWORD=$${POSTGRES_PASSWORD} psql -h postgres -U $${POSTGRES_USER} -d $${POSTGRES_DB} -v ON_ERROR_STOP=1 -At -c "
+          WITH to_cancel AS (
+            SELECT id
+            FROM help_requests
+            WHERE status = '\''pending'\''
+              AND resolved_at IS NULL
+              AND expires_at <= now()
+            ORDER BY expires_at
+            LIMIT 1000
+          ),
+          upd AS (
+            UPDATE help_requests h
+            SET status = '\''cancelled'\'',
+                cancel_reason = '\''expired'\''
+            WHERE h.id IN (SELECT id FROM to_cancel)
+            RETURNING 1
+          )
+          SELECT count(*) FROM upd;
+        ";
+        sleep 3600;
+      done'
+
 volumes:
   pgdata_salon:

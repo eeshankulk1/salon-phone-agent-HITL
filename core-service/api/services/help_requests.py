@@ -75,8 +75,6 @@ def create_help_request_for_escalation(question_text: str, customer_id: str = No
     Returns:
         Created help request object or None if creation fails
     """
-    # Default expiration: 24 hours from now
-    expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
     
     # Require valid customer_id; convert string to UUID if needed
     if isinstance(customer_id, str):
@@ -89,7 +87,6 @@ def create_help_request_for_escalation(question_text: str, customer_id: str = No
     help_request_data = {
         "customer_id": customer_id,
         "question_text": question_text,
-        "expires_at": expires_at,
         "status": "pending"
     }
     

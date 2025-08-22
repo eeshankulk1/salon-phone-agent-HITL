@@ -68,8 +68,10 @@ CREATE TABLE IF NOT EXISTS followups (
 -- indices for performance
 CREATE INDEX IF NOT EXISTS hr_status_created_idx ON help_requests (status, created_at DESC);
 
--- Indexes for use later:
--- CREATE INDEX IF NOT EXISTS hr_expires_idx ON help_requests (expires_at);                -- timeout sweeper
+-- Additional Indexes:
+CREATE INDEX IF NOT EXISTS help_requests_pending_exp_idx
+  ON help_requests (expires_at)
+  WHERE status = 'pending' AND resolved_at IS NULL;
 -- CREATE INDEX IF NOT EXISTS followups_status_idx ON followups (status, created_at);      -- sender worker
 
 -- ANN index for semantic KB search
