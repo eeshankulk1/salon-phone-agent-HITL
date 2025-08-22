@@ -43,7 +43,7 @@ const RequestHistory: React.FC = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-lg text-red-500">Error loading request history: {error}</div>
+        <div className="text-lg text-red-500">Error loading request history (make sure backend is running): {error}</div>
       </div>
     );
   }

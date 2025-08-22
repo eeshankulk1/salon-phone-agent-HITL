@@ -47,7 +47,7 @@ const KnowledgeBase: React.FC = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-lg text-red-500">Error loading knowledge base: {error}</div>
+        <div className="text-lg text-red-500">Error loading knowledge base (make sure backend is running): {error}</div>
       </div>
     );
   }

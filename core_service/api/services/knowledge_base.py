@@ -1,5 +1,5 @@
 from ..services.embeddings import embed_question
-from database import crud
+from core_service.database import crud
 from typing import List, Sequence, Union, Optional, Dict, Any
 
 

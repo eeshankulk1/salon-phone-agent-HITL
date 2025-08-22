@@ -62,7 +62,7 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onViewDetails, onRes
             <div className="flex items-center space-x-4 mb-3">
               <div className="flex items-center space-x-2">
                 <User size={14} className="text-gray-400" />
-                <span className="text-sm text-gray-600">{request.customer?.display_name || 'Unknown Customer'}</span>
+                <span className="text-sm text-gray-600">{request.customer?.display_name || 'Voice Chat User'}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Clock size={14} className="text-gray-400" />
@@ -150,7 +150,7 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onViewDetails, onRes
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <User size={16} className="text-gray-400" />
-                  <span className="text-sm text-gray-600">{request.customer?.display_name || 'Unknown Customer'}</span>
+                  <span className="text-sm text-gray-600">{request.customer?.display_name || 'Voice Chat User'}</span>
                 </div>
                 {request.customer?.phone_e164 && (
                   <div className="flex items-center space-x-2">

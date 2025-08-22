@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
 from ..schemas.knowledge_base import KnowledgeBaseOut, KnowledgeBaseCreate, KnowledgeBaseUpdate
-from database import crud
+from core_service.database import crud
 from ..services.knowledge_base import create_knowledge_base_from_text, update_knowledge_base_from_text
 
 router = APIRouter()

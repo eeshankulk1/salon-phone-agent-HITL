@@ -1,9 +1,9 @@
 import asyncio
 import logging
 from typing import Dict, Any, Optional, Callable
-from database import crud
-from database.session import SessionLocal
-from database.models import Customer
+from core_service.database import crud
+from core_service.database.session import SessionLocal
+from core_service.database.models import Customer
 
 logger = logging.getLogger("services.supervisor_response")
 
@@ -70,7 +70,6 @@ def create_customer_notification(
             "customer_id": customer_id,
             "channel": "customer_sms",
             "payload": notification_payload,
-            "status": "sent"
         }
         
         followup = crud.create_followup(followup_data)
