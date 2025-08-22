@@ -1,9 +1,11 @@
-'use client';
+"use client";
 
-import { type RefObject, useEffect, useRef } from 'react';
-import { cn } from '@/lib/utils';
+import { type RefObject, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
-export function useAutoScroll(scrollContentContainerRef: RefObject<Element | null>) {
+export function useAutoScroll(
+  scrollContentContainerRef: RefObject<Element | null>,
+) {
   useEffect(() => {
     function scrollToBottom() {
       const { scrollingElement } = document;
@@ -28,13 +30,21 @@ interface ChatProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-export const ChatMessageView = ({ className, children, ...props }: ChatProps) => {
+export const ChatMessageView = ({
+  className,
+  children,
+  ...props
+}: ChatProps) => {
   const scrollContentRef = useRef<HTMLDivElement>(null);
 
   useAutoScroll(scrollContentRef);
 
   return (
-    <div ref={scrollContentRef} className={cn('flex flex-col justify-end', className)} {...props}>
+    <div
+      ref={scrollContentRef}
+      className={cn("flex flex-col justify-end", className)}
+      {...props}
+    >
       {children}
     </div>
   );

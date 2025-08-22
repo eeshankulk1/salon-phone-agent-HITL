@@ -1,5 +1,5 @@
-import { type TrackReference, VideoTrack } from '@livekit/components-react';
-import { cn } from '@/lib/utils';
+import { type TrackReference, VideoTrack } from "@livekit/components-react";
+import { cn } from "@/lib/utils";
 
 interface AgentAudioTileProps {
   videoTrack: TrackReference;
@@ -10,7 +10,7 @@ export const AvatarTile = ({
   videoTrack,
   className,
   ref,
-}: React.ComponentProps<'div'> & AgentAudioTileProps) => {
+}: React.ComponentProps<"div"> & AgentAudioTileProps) => {
   return (
     <div ref={ref} className={cn(className)}>
       <VideoTrack

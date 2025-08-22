@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
-import { decodeJwt } from 'jose';
-import { ConnectionDetails } from '@/app/api/connection-details/route';
-import { AppConfig } from '@/lib/types';
+import { useCallback, useEffect, useState } from "react";
+import { decodeJwt } from "jose";
+import { ConnectionDetails } from "@/app/api/connection-details/route";
+import { AppConfig } from "@/lib/types";
 
 const ONE_MINUTE_IN_MILLISECONDS = 60 * 1000;
 
@@ -15,22 +15,24 @@ export default function useConnectionDetails(appConfig: AppConfig) {
   // In real-world application, you would likely allow the user to specify their
   // own participant name, and possibly to choose from existing rooms to join.
 
-  const [connectionDetails, setConnectionDetails] = useState<ConnectionDetails | null>(null);
+  const [connectionDetails, setConnectionDetails] =
+    useState<ConnectionDetails | null>(null);
 
   const fetchConnectionDetails = useCallback(async () => {
     setConnectionDetails(null);
     const url = new URL(
-      process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ?? '/api/connection-details',
-      window.location.origin
+      process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ??
+        "/api/connection-details",
+      window.location.origin,
     );
 
     let data: ConnectionDetails;
     try {
       const res = await fetch(url.toString(), {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Sandbox-Id': appConfig.sandboxId ?? '',
+          "Content-Type": "application/json",
+          "X-Sandbox-Id": appConfig.sandboxId ?? "",
         },
         body: JSON.stringify({
           room_config: appConfig.agentName
@@ -42,8 +44,8 @@ export default function useConnectionDetails(appConfig: AppConfig) {
       });
       data = await res.json();
     } catch (error) {
-      console.error('Error fetching connection details:', error);
-      throw new Error('Error fetching connection details!');
+      console.error("Error fetching connection details:", error);
+      throw new Error("Error fetching connection details!");
     }
 
     setConnectionDetails(data);

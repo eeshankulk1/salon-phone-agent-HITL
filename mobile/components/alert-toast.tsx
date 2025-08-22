@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import { toast as sonnerToast } from 'sonner';
-import { WarningIcon } from '@phosphor-icons/react/dist/ssr';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { ReactNode } from "react";
+import { toast as sonnerToast } from "sonner";
+import { WarningIcon } from "@phosphor-icons/react/dist/ssr";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 interface ToastProps {
   id: string | number;
@@ -11,10 +11,12 @@ interface ToastProps {
   description: ReactNode;
 }
 
-export function toastAlert(toast: Omit<ToastProps, 'id'>) {
+export function toastAlert(toast: Omit<ToastProps, "id">) {
   return sonnerToast.custom(
-    (id) => <AlertToast id={id} title={toast.title} description={toast.description} />,
-    { duration: 10_000 }
+    (id) => (
+      <AlertToast id={id} title={toast.title} description={toast.description} />
+    ),
+    { duration: 10_000 },
   );
 }
 

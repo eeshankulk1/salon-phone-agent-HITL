@@ -1,5 +1,5 @@
-import { headers } from 'next/headers';
-import { getAppConfig } from '@/lib/utils';
+import { headers } from "next/headers";
+import { getAppConfig } from "@/lib/utils";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -19,7 +19,11 @@ export default async function AppLayout({ children }: AppLayoutProps) {
           className="scale-100 transition-transform duration-300 hover:scale-110"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logo} alt={`${companyName} Logo`} className="block size-6 dark:hidden" />
+          <img
+            src={logo}
+            alt={`${companyName} Logo`}
+            className="block size-6 dark:hidden"
+          />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={logoDark ?? logo}
@@ -28,7 +32,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
           />
         </a>
         <span className="text-foreground font-mono text-xs font-bold tracking-wider uppercase">
-          Built with{' '}
+          Built with{" "}
           <a
             target="_blank"
             rel="noopener noreferrer"

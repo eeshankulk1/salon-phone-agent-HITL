@@ -1,8 +1,8 @@
-import { Track } from 'livekit-client';
-import { AgentControlBar } from '@/components/livekit/agent-control-bar/agent-control-bar';
-import { DeviceSelect } from '@/components/livekit/device-select';
-import { TrackToggle } from '@/components/livekit/track-toggle';
-import { Container } from '../Container';
+import { Track } from "livekit-client";
+import { AgentControlBar } from "@/components/livekit/agent-control-bar/agent-control-bar";
+import { DeviceSelect } from "@/components/livekit/device-select";
+import { TrackToggle } from "@/components/livekit/track-toggle";
+import { Container } from "../Container";
 
 export default function LiveKit() {
   return (
@@ -10,15 +10,21 @@ export default function LiveKit() {
       {/* Device select */}
       <Container>
         <div className="flex items-center justify-between">
-          <h3 className="text-muted-foreground text-sm">A device select component.</h3>
+          <h3 className="text-muted-foreground text-sm">
+            A device select component.
+          </h3>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <h4 className="text-muted-foreground mb-2 font-mono text-xs uppercase">Size default</h4>
+            <h4 className="text-muted-foreground mb-2 font-mono text-xs uppercase">
+              Size default
+            </h4>
             <DeviceSelect kind="audioinput" />
           </div>
           <div>
-            <h4 className="text-muted-foreground mb-2 font-mono text-xs uppercase">Size sm</h4>
+            <h4 className="text-muted-foreground mb-2 font-mono text-xs uppercase">
+              Size sm
+            </h4>
             <DeviceSelect size="sm" kind="audioinput" />
           </div>
         </div>
@@ -27,7 +33,9 @@ export default function LiveKit() {
       {/* Track toggle */}
       <Container>
         <div className="flex items-center justify-between">
-          <h3 className="text-muted-foreground text-sm">A track toggle component.</h3>
+          <h3 className="text-muted-foreground text-sm">
+            A track toggle component.
+          </h3>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -48,7 +56,9 @@ export default function LiveKit() {
       {/* Agent control bar */}
       <Container>
         <div className="flex items-center justify-between">
-          <h3 className="text-muted-foreground text-sm">A control bar component.</h3>
+          <h3 className="text-muted-foreground text-sm">
+            A control bar component.
+          </h3>
         </div>
         <div className="relative flex items-center justify-center">
           <AgentControlBar

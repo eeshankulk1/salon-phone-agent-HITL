@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export function Tabs() {
   const pathname = usePathname();
@@ -12,8 +12,9 @@ export function Tabs() {
       <Link
         href="/components/base"
         className={cn(
-          'text-fg0 -mb-px cursor-pointer px-4 pt-2 text-xl font-bold tracking-tight uppercase',
-          pathname === '/components/base' && 'bg-background rounded-t-lg border-t border-r border-l'
+          "text-fg0 -mb-px cursor-pointer px-4 pt-2 text-xl font-bold tracking-tight uppercase",
+          pathname === "/components/base" &&
+            "bg-background rounded-t-lg border-t border-r border-l",
         )}
       >
         Base components
@@ -21,9 +22,9 @@ export function Tabs() {
       <Link
         href="/components/livekit"
         className={cn(
-          'text-fg0 -mb-px cursor-pointer px-4 py-2 text-xl font-bold tracking-tight uppercase',
-          pathname === '/components/livekit' &&
-            'bg-background rounded-t-lg border-t border-r border-l'
+          "text-fg0 -mb-px cursor-pointer px-4 py-2 text-xl font-bold tracking-tight uppercase",
+          pathname === "/components/livekit" &&
+            "bg-background rounded-t-lg border-t border-r border-l",
         )}
       >
         LiveKit components
