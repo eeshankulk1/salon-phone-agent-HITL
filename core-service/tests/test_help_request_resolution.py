@@ -43,7 +43,7 @@ class TestHelpRequestResolution:
              patch('api.services.help_requests.crud.create_supervisor_response') as mock_create_resp, \
              patch('api.services.help_requests.create_knowledge_base_from_text') as mock_create_kb, \
              patch('api.services.help_requests.crud.update_help_request_status') as mock_update_status, \
-             patch('api.services.help_requests.notify_customer_of_resolution') as mock_notify:
+             patch('api.services.help_requests.create_customer_notification') as mock_notify:
 
             # Setup mocks
             mock_get_hr.return_value = {'help_request': mock_help_request}
@@ -151,7 +151,7 @@ class TestHelpRequestResolution:
              patch('api.services.help_requests.crud.create_supervisor_response') as mock_create_resp, \
              patch('api.services.help_requests.create_knowledge_base_from_text'), \
              patch('api.services.help_requests.crud.update_help_request_status') as mock_update_status, \
-             patch('api.services.help_requests.notify_customer_of_resolution') as mock_notify:
+             patch('api.services.help_requests.create_customer_notification') as mock_notify:
 
             # Setup mocks - notification fails
             mock_get_hr.return_value = {'help_request': mock_help_request}
@@ -193,7 +193,7 @@ class TestHelpRequestResolution:
              patch('api.services.help_requests.crud.create_supervisor_response') as mock_create_resp, \
              patch('api.services.help_requests.create_knowledge_base_from_text') as mock_create_kb, \
              patch('api.services.help_requests.crud.update_help_request_status') as mock_update_status, \
-             patch('api.services.help_requests.notify_customer_of_resolution') as mock_notify:
+             patch('api.services.help_requests.create_customer_notification') as mock_notify:
 
             # Setup mocks
             mock_get_hr.return_value = {'help_request': mock_help_request}
@@ -257,7 +257,7 @@ class TestHelpRequestResolution:
              patch('api.services.help_requests.crud.create_supervisor_response', side_effect=track_create_resp), \
              patch('api.services.help_requests.create_knowledge_base_from_text', side_effect=track_create_kb), \
              patch('api.services.help_requests.crud.update_help_request_status', side_effect=track_update_status), \
-             patch('api.services.help_requests.notify_customer_of_resolution', side_effect=track_notify):
+             patch('api.services.help_requests.create_customer_notification', side_effect=track_notify):
 
             # Call the function
             resolve_hr_and_create_kb(

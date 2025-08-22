@@ -7,7 +7,7 @@ from database.models import Customer
 
 logger = logging.getLogger("services.supervisor_response")
 
-def notify_customer_of_resolution(
+def create_customer_notification(
     help_request_id: str, 
     answer_text: str, 
     responder_id: str,

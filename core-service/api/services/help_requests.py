@@ -1,6 +1,6 @@
 from database import crud
 from .knowledge_base import create_knowledge_base_from_text
-from .supervisor_communication import create_supervisor_notification, notify_customer_of_resolution
+from .communication import create_supervisor_notification, create_customer_notification
 from datetime import datetime, timezone, timedelta
 import uuid
 import logging
@@ -50,7 +50,7 @@ def resolve_hr_and_create_kb(
     )
 
     # 5) Notify customer of resolution
-    notification_success = notify_customer_of_resolution(
+    notification_success = create_customer_notification(
         help_request_id=request_id,
         answer_text=supervisor_response.answer_text,
         responder_id=responder_id,

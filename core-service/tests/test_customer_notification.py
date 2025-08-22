@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import Mock, patch
 from io import StringIO
 
-from api.services.supervisor_communication import notify_customer_of_resolution
+from api.services.communication import create_customer_notification
 
 
 class TestCustomerNotification:
@@ -43,9 +43,9 @@ class TestCustomerNotification:
         mock_followup = Mock()
         mock_followup.id = uuid.uuid4()
 
-        with patch('api.services.supervisor_communication.crud.get_help_request_with_answer') as mock_get_hr, \
-             patch('api.services.supervisor_communication.SessionLocal') as mock_session_class, \
-             patch('api.services.supervisor_communication.crud.create_followup') as mock_create_followup:
+        with patch('api.services.communication.crud.get_help_request_with_answer') as mock_get_hr, \
+             patch('api.services.communication.SessionLocal') as mock_session_class, \
+             patch('api.services.communication.crud.create_followup') as mock_create_followup:
             
             mock_get_hr.return_value = {'help_request': mock_help_request}
             
@@ -55,7 +55,7 @@ class TestCustomerNotification:
 
             mock_create_followup.return_value = mock_followup
 
-            result = notify_customer_of_resolution(
+            result = create_customer_notification(
                 help_request_id=help_request_id,
                 answer_text=answer_text,
                 responder_id=responder_id,
@@ -82,10 +82,10 @@ class TestCustomerNotification:
         """Test notification when help request is not found"""
         help_request_id = str(uuid.uuid4())
 
-        with patch('api.services.supervisor_communication.crud.get_help_request_with_answer') as mock_get_hr:
+        with patch('api.services.communication.crud.get_help_request_with_answer') as mock_get_hr:
             mock_get_hr.return_value = None
 
-            result = notify_customer_of_resolution(
+            result = create_customer_notification(
                 help_request_id=help_request_id,
                 answer_text="Test answer",
                 responder_id="supervisor123",
@@ -98,10 +98,10 @@ class TestCustomerNotification:
         """Test exception handling during notification"""
         help_request_id = str(uuid.uuid4())
 
-        with patch('api.services.supervisor_communication.crud.get_help_request_with_answer') as mock_get_hr:
+        with patch('api.services.communication.crud.get_help_request_with_answer') as mock_get_hr:
             mock_get_hr.side_effect = Exception("Database error")
 
-            result = notify_customer_of_resolution(
+            result = create_customer_notification(
                 help_request_id=help_request_id,
                 answer_text="Test answer",
                 responder_id="supervisor123",

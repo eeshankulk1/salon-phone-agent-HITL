@@ -2,7 +2,7 @@ import pytest
 import uuid
 from unittest.mock import Mock, patch
 
-from api.services.supervisor_communication import create_supervisor_notification
+from api.services.communication import create_supervisor_notification
 from api.services.help_requests import create_help_request_for_escalation
 
 
@@ -22,8 +22,8 @@ class TestSupervisorNotification:
         mock_followup = Mock()
         mock_followup.id = uuid.uuid4()
         
-        with patch('api.services.supervisor_communication.crud.get_help_request_with_answer') as mock_get_hr, \
-             patch('api.services.supervisor_communication.crud.create_followup') as mock_create_followup:
+        with patch('api.services.communication.crud.get_help_request_with_answer') as mock_get_hr, \
+             patch('api.services.communication.crud.create_followup') as mock_create_followup:
             
             mock_get_hr.return_value = {'help_request': mock_help_request}
             mock_create_followup.return_value = mock_followup
@@ -50,7 +50,7 @@ class TestSupervisorNotification:
         """Test supervisor notification when help request is not found"""
         help_request_id = str(uuid.uuid4())
         
-        with patch('api.services.supervisor_communication.crud.get_help_request_with_answer') as mock_get_hr:
+        with patch('api.services.communication.crud.get_help_request_with_answer') as mock_get_hr:
             mock_get_hr.return_value = None
             
             result = create_supervisor_notification(help_request_id)
