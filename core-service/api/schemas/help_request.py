@@ -10,7 +10,7 @@ class HelpRequestOut(BaseModel):
     question_text: str
     status: str
     created_at: datetime
-    expires_at: Optional[datetime] = None
+    expires_at: datetime
     resolved_at: Optional[datetime] = None
     answer_text: Optional[str] = None
     

@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
 from .session import Base
 import uuid
+from datetime import timedelta
 
 
 class Customer(Base):
@@ -38,7 +39,7 @@ class HelpRequest(Base):
     normalized_key = Column(Text)
     status = Column(Text, nullable=False, default="pending")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    expires_at = Column(DateTime(timezone=True), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False, default=func.now() + timedelta(hours=1))
     resolved_at = Column(DateTime(timezone=True))
     cancel_reason = Column(Text)
     

@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS help_requests (
   normalized_key TEXT,
   status TEXT NOT NULL DEFAULT 'pending',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  expires_at TIMESTAMPTZ NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '1 hour'),
   resolved_at TIMESTAMPTZ,
   cancel_reason TEXT
 );
