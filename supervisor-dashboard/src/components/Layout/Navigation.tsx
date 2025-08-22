@@ -12,7 +12,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     { key: 'dashboard' as TabKey, label: 'Handle Requests', icon: MessageSquare },
     { key: 'knowledge-base' as TabKey, label: 'Knowledge Base', icon: BookOpen },
-    { key: 'history' as TabKey, label: 'History', icon: History },
+    { key: 'history' as TabKey, label: 'Request History', icon: History },
   ];
 
   return (

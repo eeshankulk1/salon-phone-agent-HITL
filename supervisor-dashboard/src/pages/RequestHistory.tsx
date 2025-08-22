@@ -4,16 +4,16 @@ import RequestCard from '../components/Requests/RequestCard';
 import { HelpRequest } from '../types';
 import { useAllHelpRequests } from '../hooks/useHelpRequests';
 
-const History: React.FC = () => {
+const RequestHistory: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const { requests, loading, error } = useAllHelpRequests();
 
   const statusOptions = [
     { value: 'all', label: 'All Requests' },
     { value: 'pending', label: 'Pending' },
-    { value: 'in_progress', label: 'In Progress' },
     { value: 'resolved', label: 'Resolved' },
-    { value: 'cancelled', label: 'Cancelled' }
+    { value: 'cancelled', label: 'Cancelled' },
+    { value: 'expired', label: 'Expired' }
   ];
 
   const filteredRequests = statusFilter === 'all' 
@@ -107,4 +107,4 @@ const History: React.FC = () => {
   );
 };
 
-export default History; 
+export default RequestHistory; 

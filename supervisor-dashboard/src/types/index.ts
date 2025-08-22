@@ -15,7 +15,7 @@ export interface Call {
   created_at: string;
 }
 
-export type RequestStatus = 'pending' | 'in_progress' | 'resolved' | 'cancelled';
+export type RequestStatus = 'pending' | 'resolved' | 'cancelled' | 'expired';
 
 export interface HelpRequest {
   id: string;
@@ -66,6 +66,6 @@ export interface Followup {
 
 export interface DashboardStats {
   pending: number;
-  in_progress: number;
+  cancelled: number;
   resolved: number;
 } 

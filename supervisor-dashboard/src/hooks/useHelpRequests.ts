@@ -36,7 +36,7 @@ export const useHelpRequests = (statusFilter?: RequestStatus): UseHelpRequestsRe
   // Calculate stats from the requests data
   const stats: DashboardStats = {
     pending: requests.filter(req => req.status === 'pending').length,
-    in_progress: requests.filter(req => req.status === 'in_progress').length,
+    cancelled: requests.filter(req => req.status === 'cancelled').length,
     resolved: requests.filter(req => req.status === 'resolved').length,
   };
 
