@@ -13,6 +13,7 @@ const HandleRequests: React.FC = () => {
   const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { requests, stats, loading, error, refetch } = useAllHelpRequests();
 
   const handleViewDetails = (request: HelpRequest) => {
@@ -98,6 +99,28 @@ const HandleRequests: React.FC = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+      // Show subtle success feedback for manual refresh
+      setNotification({
+        message: 'Requests refreshed successfully!',
+        type: 'success'
+      });
+      setTimeout(() => setNotification(null), notificationConfig.successDuration);
+    } catch (error) {
+      console.error('Error refreshing requests:', error);
+      setNotification({
+        message: 'Failed to refresh requests. Please try again.',
+        type: 'error'
+      });
+      setTimeout(() => setNotification(null), notificationConfig.errorDuration);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -125,6 +148,8 @@ const HandleRequests: React.FC = () => {
         onViewDetails={handleViewDetails}
         onRespond={handleRespond}
         onCancel={handleCancel}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
 
       {/* Response Modal */}

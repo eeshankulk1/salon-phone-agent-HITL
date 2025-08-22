@@ -19,12 +19,26 @@ def get_db_session():
 
 # Help Requests CRUD
 def list_help_requests(status: Optional[str] = None) -> List[HelpRequest]:
-    """List help requests, optionally filtered by status"""
+    """List help requests, optionally filtered by status
+    
+    For pending requests, automatically excludes expired requests
+    (where expires_at <= current time)
+    """
     session = SessionLocal()
     try:
         query = session.query(HelpRequest)
         if status:
-            query = query.filter(HelpRequest.status == status)
+            if status == "pending":
+                # For pending requests, filter out expired ones
+                current_time = datetime.now(timezone.utc)
+                query = query.filter(
+                    and_(
+                        HelpRequest.status == status,
+                        HelpRequest.expires_at > current_time
+                    )
+                )
+            else:
+                query = query.filter(HelpRequest.status == status)
         return query.order_by(HelpRequest.created_at.desc()).all()
     finally:
         session.close()

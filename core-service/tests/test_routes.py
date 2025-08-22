@@ -36,6 +36,24 @@ class TestHelpRequestRoutes:
         assert len(data) == 1
         assert data[0]["question_text"] == "How do I reset my password?"
         assert data[0]["status"] == "pending"
+        
+        # Verify CRUD function was called without status filter
+        mock_list_help_requests.assert_called_once_with(status=None)
+
+    @patch('database.crud.list_help_requests')
+    def test_list_help_requests_with_status_filter(self, mock_list_help_requests, client):
+        """Test GET /api/help-requests with status filter"""
+        mock_list_help_requests.return_value = []
+        
+        # Test with pending status
+        response = client.get("/api/help-requests?status=pending")
+        assert response.status_code == 200
+        mock_list_help_requests.assert_called_with(status="pending")
+        
+        # Test with resolved status
+        response = client.get("/api/help-requests?status=resolved")
+        assert response.status_code == 200
+        mock_list_help_requests.assert_called_with(status="resolved")
 
     @patch('database.crud.create_help_request')
     def test_create_help_request(self, mock_create_help_request, client):
