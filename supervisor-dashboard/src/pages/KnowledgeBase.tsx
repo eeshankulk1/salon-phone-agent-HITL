@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { Search, BookOpen } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import { KnowledgeBaseEntry } from '../types';
 import { useKnowledgeBase } from '../hooks/useKnowledgeBase';
 import KnowledgeBaseCard from '../components/KnowledgeBase/KnowledgeBaseCard';
+import SearchBar from '../components/KnowledgeBase/SearchBar';
+import AddItemButton from '../components/KnowledgeBase/AddItemButton';
+import AddKnowledgeBaseModal from '../components/Modals/AddKnowledgeBaseModal';
+import Notification from '../components/UI/Notification';
+import { notificationConfig } from '../styles/notifications';
 
 const KnowledgeBase: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const { entries, loading, error, search, updateEntry, deleteEntry } = useKnowledgeBase();
-
-  const categories = ['All Categories', 'Security', 'Operations'];
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const { entries, loading, error, search, updateEntry, deleteEntry, addEntry } = useKnowledgeBase();
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,11 +22,19 @@ const KnowledgeBase: React.FC = () => {
     search(value); // Immediate local search
   };
 
-  const filteredEntries = entries.filter(entry => {
-    const matchesCategory = selectedCategory === 'All Categories' || 
-      entry.categories?.includes(selectedCategory.toLowerCase());
-    return matchesCategory;
-  });
+  // Handle successful creation of new entry
+  const handleAddSuccess = (newEntry: KnowledgeBaseEntry) => {
+    addEntry(newEntry); // Add the new entry to the local state
+    
+    // Show success notification
+    setNotification({
+      message: 'Knowledge base entry created successfully!',
+      type: 'success'
+    });
+    
+    // Auto-close notification after configured duration
+    setTimeout(() => setNotification(null), notificationConfig.successDuration);
+  };
 
   if (loading) {
     return (
@@ -49,41 +61,23 @@ const KnowledgeBase: React.FC = () => {
         </div>
       </div>
 
-      {/* Search and Filters */}
+      {/* Search and Add Item */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search knowledge base..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div className="flex space-x-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+          <SearchBar 
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+          />
+          <AddItemButton 
+            onClick={() => setIsAddModalOpen(true)}
+          />
         </div>
       </div>
 
       {/* Knowledge Base Entries */}
       <div className="space-y-6">
-        {filteredEntries.length > 0 ? (
-          filteredEntries.map((entry) => (
+        {entries.length > 0 ? (
+          entries.map((entry) => (
             <KnowledgeBaseCard
               key={entry.id}
               entry={entry}
@@ -96,11 +90,27 @@ const KnowledgeBase: React.FC = () => {
             <BookOpen className="mx-auto text-gray-300 mb-4" size={48} />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No knowledge base entries found</h3>
             <p className="text-gray-500">
-              {searchTerm ? 'Try adjusting your search terms or filters.' : 'Knowledge base entries will appear here as they are created.'}
+              {searchTerm ? 'Try adjusting your search terms.' : 'Knowledge base entries will appear here as they are created.'}
             </p>
           </div>
         )}
       </div>
+
+      {/* Add Item Modal */}
+      <AddKnowledgeBaseModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleAddSuccess}
+      />
+
+      {/* Notification */}
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 };
