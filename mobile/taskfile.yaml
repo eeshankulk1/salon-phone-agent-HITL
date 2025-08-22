@@ -1,0 +1,23 @@
+version: '3'
+output: interleaved
+dotenv: ['../.env']
+
+tasks:
+  post_create:
+    desc: 'Runs after this template is instantiated as a Sandbox or Bootstrap'
+    cmds:
+      - echo -e "\nYour Next.js voice assistant is ready to go!\n"
+      - echo -e "To give it a try, run the following commands:\r\n"
+      - echo -e "\tcd {{.ROOT_DIR}}\r"
+      - echo -e "\tnpm install\r"
+      - echo -e "\tnpm run dev\r\n"
+
+  install:
+    interactive: true
+    cmds:
+      - 'npm install'
+
+  dev:
+    interactive: true
+    cmds:
+      - 'npm run dev'
