@@ -31,6 +31,38 @@ class TestHelpRequestsCRUD:
             resolved_requests = crud.list_help_requests(status="resolved")
             assert len(resolved_requests) == 0
 
+    def test_list_help_requests_excludes_expired_pending(self, test_engine, sample_customer):
+        """Test that pending requests filter excludes expired requests"""
+        TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+        
+        with patch('database.crud.SessionLocal', TestSessionLocal):
+            # Create an expired pending request
+            expired_request_data = {
+                "customer_id": sample_customer.id,
+                "question_text": "Expired question",
+                "status": "pending",
+                "expires_at": datetime.now(timezone.utc) - timedelta(hours=1)  # Expired 1 hour ago
+            }
+            crud.create_help_request(expired_request_data)
+            
+            # Create a valid pending request
+            valid_request_data = {
+                "customer_id": sample_customer.id,
+                "question_text": "Valid question",
+                "status": "pending", 
+                "expires_at": datetime.now(timezone.utc) + timedelta(hours=1)  # Expires in 1 hour
+            }
+            crud.create_help_request(valid_request_data)
+            
+            # Test that only the valid pending request is returned
+            pending_requests = crud.list_help_requests(status="pending")
+            assert len(pending_requests) == 1
+            assert pending_requests[0].question_text == "Valid question"
+            
+            # Test that all requests (regardless of status filter) returns both
+            all_requests = crud.list_help_requests()
+            assert len(all_requests) == 2
+
     def test_create_help_request(self, test_engine, sample_customer):
         """Test creating a new help request"""
         TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
