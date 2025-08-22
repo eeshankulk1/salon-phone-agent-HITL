@@ -63,6 +63,14 @@ async def search_knowledge_base(context: RunContext, query: str) -> str:
             add_to_chat_ctx=False,
         )
 
+        # Log customer escalation notification
+        logger.info("\n" + "="*60 +
+                   f"\n📞  QUESTION ESCALATED TO SUPERVISOR" +
+                   f"\n❓  Customer Question: {query}" +
+                   f"\n💬  Customer Notified: Thanks for your patience - we're getting help!" +
+                   f"\n⏳  Status: Awaiting supervisor response" +
+                   "\n" + "="*60)
+
         # Cancel status update task if still pending
         status_update_task.cancel()
         

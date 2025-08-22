@@ -140,7 +140,6 @@ def create_supervisor_notification(help_request_id: str) -> Optional[str]:
         followup = crud.create_followup(followup_data)
         
         if followup:
-            logger.info(f"Created supervisor notification followup {followup.id} for help request {help_request_id}")
             return str(followup.id)
         else:
             logger.error(f"Failed to create supervisor notification for help request {help_request_id}")
