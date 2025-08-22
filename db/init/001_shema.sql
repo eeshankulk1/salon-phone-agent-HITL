@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS knowledge_base (
 -- followups
 CREATE TABLE IF NOT EXISTS followups (
   id UUID PRIMARY KEY,
-  help_request_id UUID NOT NULL UNIQUE REFERENCES help_requests(id) ON DELETE CASCADE,
+  help_request_id UUID NOT NULL REFERENCES help_requests(id) ON DELETE CASCADE,
   customer_id UUID NOT NULL REFERENCES customers(id),
   channel TEXT NOT NULL,
   payload JSONB,

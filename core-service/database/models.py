@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, String, Text, DateTime, Boolean, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -81,6 +81,7 @@ class Followup(Base):
     help_request_id = Column(UUID(as_uuid=True), ForeignKey("help_requests.id", ondelete="CASCADE"), unique=True, nullable=False)
     customer_id = Column(UUID(as_uuid=True), ForeignKey("customers.id"), nullable=False)
     channel = Column(Text, nullable=False)
+    payload = Column(JSON)
     status = Column(Text, nullable=False, default="pending")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     sent_at = Column(DateTime(timezone=True))

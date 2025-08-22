@@ -1,15 +1,22 @@
 from database import crud
 from .knowledge_base import create_knowledge_base_from_text
-from .handle_supervisor_communication import text_supervisor_sync
+from .communication import create_supervisor_notification, create_customer_notification
 from datetime import datetime, timezone, timedelta
 import uuid
+import logging
 
-def resolve_hr_and_create_kb(request_id: str, answer_text: str, responder_id: str):
+def resolve_hr_and_create_kb(
+    request_id: str, 
+    answer_text: str, 
+    responder_id: str,
+    notification_logger: logging.Logger
+):
     """
     Resolve help request with proper flow:
     1. Create supervisor response record
     2. Use response data to create KB entry
     3. Update help request status to resolved
+    4. Notify customer of resolution
     """
     # 1) Fetch help request to get question text
     help_request_with_answer = crud.get_help_request_with_answer(request_id)
@@ -41,6 +48,17 @@ def resolve_hr_and_create_kb(request_id: str, answer_text: str, responder_id: st
         request_id=request_id,
         status="resolved"
     )
+
+    # 5) Notify customer of resolution
+    notification_success = create_customer_notification(
+        help_request_id=request_id,
+        answer_text=supervisor_response.answer_text,
+        responder_id=responder_id,
+        notification_logger=notification_logger
+    )
+    
+    if not notification_success:
+        notification_logger.warning(f"Failed to send customer notification for help request {request_id}")
 
     return resolved, supervisor_response
 
@@ -82,12 +100,16 @@ def create_help_request_for_escalation(question_text: str, customer_id: str = No
     # Create the help request
     help_request = crud.create_help_request(help_request_data)
     
-    # If help request was created successfully, simulate texting the supervisor
+    # If help request was created successfully, create supervisor notification
     if help_request:
         try:
-            text_supervisor_sync(str(help_request.id))
+            followup_id = create_supervisor_notification(str(help_request.id))
+            if followup_id:
+                print(f"Created supervisor notification followup {followup_id} for help request {help_request.id}")
+            else:
+                print(f"Warning: Failed to create supervisor notification for help request {help_request.id}")
         except Exception as e:
-            print(f"Error simulating supervisor text: {e}")
+            print(f"Error creating supervisor notification: {e}")
     
     return help_request
 
