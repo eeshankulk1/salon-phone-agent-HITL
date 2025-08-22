@@ -11,6 +11,7 @@ interface UseKnowledgeBaseReturn {
   search: (query: string) => void;
   updateEntry: (updatedEntry: KnowledgeBaseEntry) => void;
   deleteEntry: (entryId: string) => void;
+  addEntry: (newEntry: KnowledgeBaseEntry) => void;
 }
 
 export const useKnowledgeBase = (): UseKnowledgeBaseReturn => {
@@ -61,6 +62,11 @@ export const useKnowledgeBase = (): UseKnowledgeBaseReturn => {
     );
   }, []);
 
+  // Add a new entry to local state
+  const addEntry = useCallback((newEntry: KnowledgeBaseEntry) => {
+    setAllEntries(prevEntries => [newEntry, ...prevEntries]);
+  }, []);
+
   // Filter entries locally based on search query
   const filteredEntries = useMemo(() => {
     if (!searchQuery) {
@@ -93,5 +99,6 @@ export const useKnowledgeBase = (): UseKnowledgeBaseReturn => {
     search,
     updateEntry,
     deleteEntry,
+    addEntry,
   };
 }; 
