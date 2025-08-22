@@ -31,6 +31,10 @@ supervisor-dashboard/.env.development.local
 supervisor-dashboard/.env.test.local
 supervisor-dashboard/.env.production.local
 
+mobile/.next/
+mobile/node_modules/
+
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
