@@ -4,7 +4,10 @@ from ..schemas.help_request import HelpRequestOut, HelpRequestCreate, HelpReques
 from database import crud
 from database.models import SupervisorResponse
 from ..services.help_requests import resolve_hr_and_create_kb
+import logging
+
 router = APIRouter()
+logger = logging.getLogger("routes.help_requests")
 
 
 def _help_request_to_out(help_request, supervisor_response: Optional[SupervisorResponse] = None) -> HelpRequestOut:
@@ -59,10 +62,12 @@ def create_help_request(help_request: HelpRequestCreate):
 
 @router.post("/{request_id}/resolve", response_model=HelpRequestOut)
 def resolve_help_request(request_id: str, resolve_data: HelpRequestResolve):
+    """Resolve a help request and notify the customer"""
     resolved, supervisor_response = resolve_hr_and_create_kb(
         request_id=request_id,
         answer_text=resolve_data.answer_text,
         responder_id=resolve_data.responder_id,
+        notification_logger=logger,
     )
     if not resolved:
         raise HTTPException(status_code=404, detail="Help request not found")

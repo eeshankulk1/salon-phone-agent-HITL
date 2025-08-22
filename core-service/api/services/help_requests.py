@@ -1,15 +1,22 @@
 from database import crud
 from .knowledge_base import create_knowledge_base_from_text
-from .handle_supervisor_communication import text_supervisor_sync
+from .supervisor_communication import text_supervisor_sync, notify_customer_of_resolution
 from datetime import datetime, timezone, timedelta
 import uuid
+import logging
 
-def resolve_hr_and_create_kb(request_id: str, answer_text: str, responder_id: str):
+def resolve_hr_and_create_kb(
+    request_id: str, 
+    answer_text: str, 
+    responder_id: str,
+    notification_logger: logging.Logger
+):
     """
     Resolve help request with proper flow:
     1. Create supervisor response record
     2. Use response data to create KB entry
     3. Update help request status to resolved
+    4. Notify customer of resolution
     """
     # 1) Fetch help request to get question text
     help_request_with_answer = crud.get_help_request_with_answer(request_id)
@@ -41,6 +48,17 @@ def resolve_hr_and_create_kb(request_id: str, answer_text: str, responder_id: st
         request_id=request_id,
         status="resolved"
     )
+
+    # 5) Notify customer of resolution
+    notification_success = notify_customer_of_resolution(
+        help_request_id=request_id,
+        answer_text=supervisor_response.answer_text,
+        responder_id=responder_id,
+        notification_logger=notification_logger
+    )
+    
+    if not notification_success:
+        notification_logger.warning(f"Failed to send customer notification for help request {request_id}")
 
     return resolved, supervisor_response
 

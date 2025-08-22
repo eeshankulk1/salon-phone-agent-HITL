@@ -4,10 +4,6 @@ from livekit.agents import function_tool, RunContext
 from api.services.knowledge_base import search_knowledge_base_by_question
 from api.services.help_requests import create_help_request_for_escalation
 from api.services.customer import create_customer_for_session
-from api.services.handle_supervisor_communication import handle_supervisor_response
-
-from agent.watch_help_requests import HelpWatcher
-watcher = HelpWatcher()
 
 import logging
 logger = logging.getLogger("agent.tools")
@@ -69,21 +65,6 @@ async def search_knowledge_base(context: RunContext, query: str) -> str:
 
         # Cancel status update task if still pending
         status_update_task.cancel()
-
-        # Start listening for supervisor response in background (logging only)
-        async def _start_supervisor_listener():
-            try:
-                await handle_supervisor_response(
-                    help_request_id=str(help_request.id),
-                    query=query,
-                    watcher=watcher
-                    # No callback - only logging will occur
-                )
-            except Exception as e:
-                logger.error(f"Error in supervisor response listener: {e}")
-
-        # Start the background task
-        asyncio.create_task(_start_supervisor_listener())
         
         return None
     

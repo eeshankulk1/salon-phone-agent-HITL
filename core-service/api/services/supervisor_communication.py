@@ -1,68 +1,73 @@
 import asyncio
 import logging
 from typing import Dict, Any, Optional, Callable
-from agent.watch_help_requests import HelpWatcher
 from database import crud
 
 logger = logging.getLogger("services.supervisor_response")
 
-async def handle_supervisor_response(
-    help_request_id: str,
-    query: str,
-    watcher: HelpWatcher,
-    on_response_callback: Optional[Callable[[str, Dict[str, Any]], None]] = None
-) -> tuple[str, Dict[str, Any]]:
+def notify_customer_of_resolution(
+    help_request_id: str, 
+    answer_text: str, 
+    responder_id: str,
+    notification_logger: logging.Logger
+) -> bool:
     """
-    Handle supervisor response for a help request by listening for PostgreSQL notifications.
+    Notify the customer about the resolution of their help request via simulated text.
     
     Args:
-        help_request_id: The ID of the help request to listen for
-        query: The original query for logging purposes
-        watcher: The HelpWatcher instance to use for listening
-        on_response_callback: Optional callback function to execute when response is received
+        help_request_id: The ID of the resolved help request
+        answer_text: The answer provided by the supervisor
+        responder_id: The ID of the person who provided the response
+        notification_logger: Logger instance to use for the simulated text notification
         
     Returns:
-        Tuple of (answer_text, payload) when supervisor responds
+        bool: True if notification was sent successfully, False otherwise
         
     Raises:
-        Exception: If there's an error waiting for or processing the supervisor response
+        Exception: If there's an error fetching help request or customer details
     """
     try:
-        logger.info("\n" + "="*60 +
-                   f"\n🔔  WAITING FOR SUPERVISOR RESPONSE" +
-                   f"\n📋  Help Request ID: {help_request_id}" +
-                   f"\n❓  Query: {query}" +
-                   "\n" + "="*60)
+        # Fetch the help request with customer details
+        help_request_data = crud.get_help_request_with_answer(help_request_id)
         
-        # Wait for supervisor response (no timeout - wait indefinitely)
-        answer_text, payload = await watcher.wait(help_request_id)
+        if not help_request_data or not help_request_data.get("help_request"):
+            notification_logger.error(f"Help request {help_request_id} not found for customer notification")
+            return False
         
-        # Fetch the full help request details to get the original question
-        help_request_data = await asyncio.to_thread(
-            crud.get_help_request_with_answer, 
-            help_request_id
-        )
+        help_request = help_request_data["help_request"]
+        customer_question = help_request.question_text
+        customer_id = help_request.customer_id
         
-        original_question = query  # fallback to the query parameter
-        if help_request_data and help_request_data.get("help_request"):
-            original_question = help_request_data["help_request"].question_text
+        # Get customer details for enhanced notification
+        from database.session import SessionLocal
+        from database.models import Customer
         
-        logger.info("\n" + "="*60 +
-                   f"\nSorry for the delay, I've got an answer to your question: {original_question}" +
-                   f"\nThe answer to your question is: {answer_text}" +
-                   f"\n\n👨‍💼  Responder ID: {payload.get('responder_id', 'Unknown')}" +
-                   f"\n📋  Help Request ID: {help_request_id}" +
-                   "\n" + "="*60)
+        session = SessionLocal()
+        try:
+            customer = session.query(Customer).filter(Customer.id == customer_id).first()
+            customer_name = customer.display_name if customer and customer.display_name else f"Customer {customer_id}"
+            customer_phone = customer.phone_e164 if customer and customer.phone_e164 else "No phone on file"
+        finally:
+            session.close()
         
-        # Execute callback if provided
-        if on_response_callback:
-            await on_response_callback(answer_text, payload)
+        # Send simulated text notification to customer
+        notification_logger.info("\n" + "="*80 +
+                                f"\n📱  SENDING RESOLUTION NOTIFICATION TO CUSTOMER" +
+                                f"\n👤  Customer: {customer_name} ({customer_id})" +
+                                f"\n📞  Phone: {customer_phone}" +
+                                f"\n📋  Help Request ID: {help_request_id}" +
+                                f"\n❓  Original Question: {customer_question}" +
+                                f"\n✅  Resolution Answer: {answer_text}" +
+                                f"\n👨‍💼  Resolved by: {responder_id}" +
+                                f"\n💬  Text Message: Hi {customer_name}! We've got an answer to your question: '{customer_question}'. " +
+                                f"Here's the response: {answer_text}. Thanks for your patience!" +
+                                "\n" + "="*80)
         
-        return answer_text, payload
+        return True
         
     except Exception as e:
-        logger.error(f"Error handling supervisor response for help request {help_request_id}: {e}")
-        raise
+        notification_logger.error(f"Error sending customer notification for help request {help_request_id}: {e}")
+        return False
 
 
 async def simulate_text_supervisor(help_request_id: str) -> None:
