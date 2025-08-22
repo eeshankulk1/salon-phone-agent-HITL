@@ -1,9 +1,9 @@
 import asyncio
 import json
 from livekit.agents import function_tool, RunContext
-from api.services.knowledge_base import search_knowledge_base_by_question
-from api.services.help_requests import create_help_request_for_escalation
-from api.services.customer import create_customer_for_session
+from core_service.api.services.knowledge_base import search_knowledge_base_by_question
+from core_service.api.services.help_requests import create_help_request_for_escalation
+from core_service.api.services.customer import create_customer_for_session
 
 import logging
 logger = logging.getLogger("agent.tools")
@@ -19,7 +19,7 @@ async def search_knowledge_base(context: RunContext, query: str) -> str:
     # Gate the status update so it does not trigger another LLM planning cycle
     search_done = asyncio.Event()
 
-    async def _speak_status_update(timeout_s: float = 0.5) -> None:
+    async def _speak_status_update(timeout_s: float = 1.5) -> None:
         try:
             # If the search finishes before the timeout, do nothing
             await asyncio.wait_for(search_done.wait(), timeout=timeout_s)
@@ -32,10 +32,10 @@ async def search_knowledge_base(context: RunContext, query: str) -> str:
                 add_to_chat_ctx=False,
             )
 
-    status_update_task = asyncio.create_task(_speak_status_update(0.5))
+    status_update_task = asyncio.create_task(_speak_status_update(1.5))
 
     # Perform search off the event loop
-    result = await asyncio.to_thread(search_knowledge_base_by_question, query, 1, 0.7)
+    result = await asyncio.to_thread(search_knowledge_base_by_question, query, 1, 0.5)
 
     # Signal completion to cancel any pending status update
     search_done.set()

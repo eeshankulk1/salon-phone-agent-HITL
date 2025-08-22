@@ -12,7 +12,7 @@ from livekit.plugins import (
 )
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from agent.tools import search_knowledge_base
-from api.services.customer import create_customer_for_session
+from core_service.api.services.customer import create_customer_for_session
 
 import logging
 logger = logging.getLogger("agent")
@@ -27,9 +27,8 @@ class Assistant(Agent):
                          - Do not repeat the exact text from the knowledge base verbatim
                          - Integrate the information smoothly into your answer
                          - If the tool returns None or empty result, it means the tool has already handled the response - do not generate additional responses
-                         - Be conversational, helpful, and professional
                          
-                         Be conversational, helpful, and professional. If you don't know the answer, don't make up an answer, use the search_knowledge_base tool to find the answer.
+                         Be conversational, helpful, and professional, but concise. But don't ask the user follow up questions. If you don't know the answer, don't make up an answer, use the search_knowledge_base tool to find the answer.
                          """,
                          tools=[search_knowledge_base]
                          )

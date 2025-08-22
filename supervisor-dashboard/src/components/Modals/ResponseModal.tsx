@@ -48,9 +48,9 @@ const ResponseModal: React.FC<ResponseModalProps> = ({
           <div className="mb-6">
             <h3 className="text-lg font-medium text-gray-900 mb-2">Request Details</h3>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600 mb-2">
+              {/* <p className="text-sm text-gray-600 mb-2">
                 <strong>Customer:</strong> {request.customer?.display_name || 'Unknown Customer'}
-              </p>
+              </p> */}
               <p className="text-sm text-gray-600 mb-2">
                 <strong>Question:</strong>
               </p>

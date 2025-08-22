@@ -52,7 +52,7 @@ services:
           ),
           upd AS (
             UPDATE help_requests h
-            SET status = '\''cancelled'\'',
+            SET status = '\''expired'\'',
                 cancel_reason = '\''expired'\''
             WHERE h.id IN (SELECT id FROM to_cancel)
             RETURNING 1

@@ -1,4 +1,4 @@
-from database import crud
+from core_service.database import crud
 from .knowledge_base import create_knowledge_base_from_text
 from .communication import create_supervisor_notification, create_customer_notification
 from datetime import datetime, timezone, timedelta

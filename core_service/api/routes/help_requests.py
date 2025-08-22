@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
 from ..schemas.help_request import HelpRequestOut, HelpRequestCreate, HelpRequestResolve, HelpRequestCancel
-from database import crud
-from database.models import SupervisorResponse
+from core_service.database import crud
+from core_service.database.models import SupervisorResponse
 from ..services.help_requests import resolve_hr_and_create_kb
 import logging
 

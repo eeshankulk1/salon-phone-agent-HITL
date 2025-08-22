@@ -1,4 +1,4 @@
-from database import crud
+from core_service.database import crud
 
 
 def create_customer_for_session(display_name: str = None, phone_e164: str = None):
