@@ -70,15 +70,67 @@ def notify_customer_of_resolution(
         return False
 
 
-async def simulate_text_supervisor(help_request_id: str) -> None:
+def create_supervisor_notification(help_request_id: str) -> Optional[str]:
     """
-    Simulate texting the supervisor about a new help request.
+    Create a followup record to notify the supervisor about a new help request.
     
     Args:
-        help_request_id: The ID of the help request to send to supervisor
+        help_request_id: The ID of the help request to notify supervisor about
+        
+    Returns:
+        Optional[str]: The ID of the created followup record, or None if creation failed
         
     Raises:
-        Exception: If there's an error fetching help request details
+        Exception: If there's an error fetching help request details or creating followup
+    """
+    try:
+        # Fetch the help request details
+        help_request_data = crud.get_help_request_with_answer(help_request_id)
+        
+        if not help_request_data or not help_request_data.get("help_request"):
+            logger.error(f"Help request {help_request_id} not found for supervisor notification")
+            return None
+        
+        help_request = help_request_data["help_request"]
+        customer_question = help_request.question_text
+        customer_id = help_request.customer_id
+        
+        # Create the supervisor notification payload
+        notification_payload = {
+            "message": f"Hey, I need help answering {customer_question}",
+            "help_request_id": help_request_id,
+            "customer_id": str(customer_id),
+            "question": customer_question
+        }
+        
+        # Create followup record for supervisor notification
+        followup_data = {
+            "help_request_id": help_request_id,
+            "customer_id": customer_id,
+            "channel": "supervisor_sms",
+            "payload": notification_payload,
+            "status": "pending"
+        }
+        
+        followup = crud.create_followup(followup_data)
+        
+        if followup:
+            logger.info(f"Created supervisor notification followup {followup.id} for help request {help_request_id}")
+            return str(followup.id)
+        else:
+            logger.error(f"Failed to create supervisor notification for help request {help_request_id}")
+            return None
+        
+    except Exception as e:
+        logger.error(f"Error creating supervisor notification for help request {help_request_id}: {e}")
+        return None
+
+
+# Legacy functions - kept for backward compatibility during transition
+async def simulate_text_supervisor(help_request_id: str) -> None:
+    """
+    DEPRECATED: Legacy function that logs supervisor texts.
+    Use create_supervisor_notification instead for new implementations.
     """
     try:
         # Fetch the help request details
@@ -110,11 +162,8 @@ async def simulate_text_supervisor(help_request_id: str) -> None:
 
 def text_supervisor_sync(help_request_id: str) -> None:
     """
-    Synchronous wrapper to simulate texting the supervisor about a new help request.
-    This function can be called from synchronous backend code.
-    
-    Args:
-        help_request_id: The ID of the help request to send to supervisor
+    DEPRECATED: Legacy synchronous wrapper for supervisor text simulation.
+    Use create_supervisor_notification instead for new implementations.
     """
     try:
         # Fetch the help request details synchronously
