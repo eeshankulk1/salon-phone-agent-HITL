@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Header from './components/Layout/Header';
 import Navigation from './components/Layout/Navigation';
-import HandleRequests from './pages/Dashboard';
-import History from './pages/History';
+import HandleRequests from './pages/HandleRequests';
+import RequestHistory from './pages/RequestHistory';
 import KnowledgeBase from './pages/KnowledgeBase';
 import { useAllHelpRequests } from './hooks/useHelpRequests';
 
@@ -17,7 +17,7 @@ const App: React.FC = () => {
       case 'dashboard':
         return <HandleRequests />;
       case 'history':
-        return <History />;
+        return <RequestHistory />;
       case 'knowledge-base':
         return <KnowledgeBase />;
       default:

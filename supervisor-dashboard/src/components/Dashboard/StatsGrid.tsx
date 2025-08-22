@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { Clock, X, CheckCircle } from 'lucide-react';
 import StatCard from './StatCard';
 import { DashboardStats, HelpRequest } from '../../types';
 
@@ -24,11 +24,11 @@ const StatsGrid: React.FC<StatsGridProps> = ({ stats, requests }) => {
         iconColor="bg-orange-500"
       />
       <StatCard
-        title="In Progress"
-        count={stats.in_progress}
-        description="Being processed"
-        icon={AlertCircle}
-        iconColor="bg-blue-500"
+        title="Cancelled"
+        count={stats.cancelled}
+        description="Cancelled requests"
+        icon={X}
+        iconColor="bg-red-500"
       />
       <StatCard
         title="Resolved Today"

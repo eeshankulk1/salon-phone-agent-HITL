@@ -5,7 +5,7 @@ import ResponseModal from '../components/Modals/ResponseModal';
 import Notification from '../components/UI/Notification';
 import { HelpRequest } from '../types';
 import { useAllHelpRequests } from '../hooks/useHelpRequests';
-import { resolveHelpRequest } from '../services/helpRequests';
+import { resolveHelpRequest, cancelHelpRequest } from '../services/helpRequests';
 import { notificationConfig } from '../styles/notifications';
 
 const HandleRequests: React.FC = () => {
@@ -23,6 +23,43 @@ const HandleRequests: React.FC = () => {
   const handleRespond = (request: HelpRequest) => {
     setSelectedRequest(request);
     setIsResponseModalOpen(true);
+  };
+
+  const handleCancel = async (request: HelpRequest) => {
+    if (!window.confirm('Are you sure you want to cancel this help request?')) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await cancelHelpRequest(request.id, {
+        cancel_reason: 'cancelled by supervisor'
+      });
+      
+      // Show success notification
+      setNotification({
+        message: 'Request cancelled successfully!',
+        type: 'success'
+      });
+      
+      // Refresh the data to show updated status
+      await refetch();
+      
+      // Auto-close notification after configured duration
+      setTimeout(() => setNotification(null), notificationConfig.successDuration);
+      
+    } catch (error) {
+      console.error('Error cancelling help request:', error);
+      setNotification({
+        message: 'Failed to cancel request. Please try again.',
+        type: 'error'
+      });
+      
+      // Auto-close error notification after configured duration
+      setTimeout(() => setNotification(null), notificationConfig.errorDuration);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmitResponse = async (response: string) => {
@@ -87,6 +124,7 @@ const HandleRequests: React.FC = () => {
         requests={requests}
         onViewDetails={handleViewDetails}
         onRespond={handleRespond}
+        onCancel={handleCancel}
       />
 
       {/* Response Modal */}

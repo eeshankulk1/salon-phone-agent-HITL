@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { Clock, User, MessageSquare, ChevronDown, ChevronRight, Phone, Calendar } from 'lucide-react';
+import { Clock, User, MessageSquare, ChevronDown, ChevronRight, Phone, Calendar, X } from 'lucide-react';
 import { HelpRequest } from '../../types';
 
 interface RequestCardProps {
   request: HelpRequest;
   onViewDetails?: (request: HelpRequest) => void;
   onRespond?: (request: HelpRequest) => void;
+  onCancel?: (request: HelpRequest) => void;
 }
 
-const RequestCard: React.FC<RequestCardProps> = ({ request, onViewDetails, onRespond }) => {
+const RequestCard: React.FC<RequestCardProps> = ({ request, onViewDetails, onRespond, onCancel }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -36,51 +38,77 @@ const RequestCard: React.FC<RequestCardProps> = ({ request, onViewDetails, onRes
     switch (status) {
       case 'pending':
         return 'bg-orange-100 text-orange-800';
-      case 'in_progress':
-        return 'bg-blue-100 text-blue-800';
       case 'resolved':
         return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      case 'expired':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200">
-      <div className="p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 mr-4">
-            <div className="flex items-center space-x-3 mb-3">
+    <div 
+      className="bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex-1 mr-6">
+            {/* Top section with customer info and timestamp */}
+            <div className="flex items-center space-x-4 mb-3">
               <div className="flex items-center space-x-2">
-                <User size={16} className="text-gray-400" />
+                <User size={14} className="text-gray-400" />
                 <span className="text-sm text-gray-600">{request.customer?.display_name || 'Unknown Customer'}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Clock size={16} className="text-gray-400" />
+                <Clock size={14} className="text-gray-400" />
                 <span className="text-sm text-gray-600">{formatDate(request.created_at)}</span>
               </div>
             </div>
             
-            <h3 className="text-lg font-medium text-gray-900 mb-2">{request.question_text}</h3>
+            {/* Question text */}
+            <h3 className="text-lg font-medium text-gray-900 mb-4 leading-relaxed">{request.question_text}</h3>
             
-            <div className="flex items-center space-x-3">
+            {/* Status badge at bottom */}
+            <div className="flex items-center">
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                 {request.status.replace('_', ' ').toUpperCase()}
               </span>
             </div>
           </div>
           
-          <div className="flex flex-col space-y-4 flex-shrink-0">
+          <div className="flex flex-col items-end space-y-2 flex-shrink-0">
+            {/* Cancel Button - Small and positioned at top right */}
+            <div className="h-6 w-6 flex items-center justify-center">
+              {onCancel && request.status === 'pending' && (
+                <button
+                  onClick={() => onCancel(request)}
+                  className={`p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-all duration-200 ${
+                    isHovered ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  title="Cancel request"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            
+            {/* Respond Button */}
             {onRespond && request.status === 'pending' && (
               <button
                 onClick={() => onRespond(request)}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 mt-4"
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 transition-colors"
               >
                 <MessageSquare size={16} />
                 <span>Respond</span>
               </button>
             )}
             
+            {/* View Details Button */}
             <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
