@@ -28,4 +28,8 @@ class HelpRequestCreate(BaseModel):
 
 class HelpRequestResolve(BaseModel):
     answer_text: str
-    responder_id: Optional[str] = None 
+    responder_id: Optional[str] = None
+
+
+class HelpRequestCancel(BaseModel):
+    cancel_reason: Optional[str] = None 

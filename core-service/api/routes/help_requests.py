@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
-from ..schemas.help_request import HelpRequestOut, HelpRequestCreate, HelpRequestResolve
+from ..schemas.help_request import HelpRequestOut, HelpRequestCreate, HelpRequestResolve, HelpRequestCancel
 from database import crud
 from database.models import SupervisorResponse
 from ..services.help_requests import resolve_hr_and_create_kb
@@ -49,17 +49,6 @@ def list_help_requests(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/", response_model=HelpRequestOut)
-def create_help_request(help_request: HelpRequestCreate):
-    """Create a new help request"""
-    try:
-        help_request_data = help_request.model_dump()
-        created_request = crud.create_help_request(help_request_data)
-        return _help_request_to_out(created_request)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @router.post("/{request_id}/resolve", response_model=HelpRequestOut)
 def resolve_help_request(request_id: str, resolve_data: HelpRequestResolve):
     """Resolve a help request and notify the customer"""
@@ -72,6 +61,25 @@ def resolve_help_request(request_id: str, resolve_data: HelpRequestResolve):
     if not resolved:
         raise HTTPException(status_code=404, detail="Help request not found")
     return _help_request_to_out(resolved, supervisor_response)
+
+
+@router.post("/{request_id}/cancel", response_model=HelpRequestOut)
+def cancel_help_request(request_id: str, cancel_data: HelpRequestCancel):
+    """Cancel a pending help request"""
+    try:
+        cancelled_request = crud.update_help_request_status(
+            request_id=request_id, 
+            status="cancelled", 
+            cancel_reason=cancel_data.cancel_reason
+        )
+        if not cancelled_request:
+            raise HTTPException(status_code=404, detail="Help request not found")
+        
+        logger.info(f"Help request {request_id} cancelled by supervisor")
+        return _help_request_to_out(cancelled_request)
+    except Exception as e:
+        logger.error(f"Error cancelling help request {request_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{request_id}", response_model=HelpRequestOut)

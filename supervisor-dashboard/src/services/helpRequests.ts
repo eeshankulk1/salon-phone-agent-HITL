@@ -21,4 +21,14 @@ export const resolveHelpRequest = async (
   }
 ): Promise<HelpRequest> => {
   return apiClient.post<HelpRequest>(`/help-requests/${id}/resolve`, data);
+};
+
+// Cancel a help request
+export const cancelHelpRequest = async (
+  id: string,
+  data?: {
+    cancel_reason?: string;
+  }
+): Promise<HelpRequest> => {
+  return apiClient.post<HelpRequest>(`/help-requests/${id}/cancel`, data || {});
 }; 

@@ -66,7 +66,7 @@ def create_supervisor_response(request_id: str, answer_text: str, responder_id: 
         session.close()
 
 
-def update_help_request_status(request_id: str, status: str = "resolved") -> Optional[HelpRequest]:
+def update_help_request_status(request_id: str, status: str = "resolved", cancel_reason: Optional[str] = None) -> Optional[HelpRequest]:
     """Update help request status and resolved_at timestamp"""
     session = SessionLocal()
     try:
@@ -77,6 +77,8 @@ def update_help_request_status(request_id: str, status: str = "resolved") -> Opt
         help_request.status = status
         if status == "resolved":
             help_request.resolved_at = datetime.now(timezone.utc)
+        elif status == "cancelled":
+            help_request.cancel_reason = cancel_reason or "cancelled by supervisor"
         
         session.commit()
         session.refresh(help_request)

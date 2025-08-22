@@ -6,12 +6,14 @@ interface PendingRequestsSectionProps {
   requests: HelpRequest[];
   onViewDetails: (request: HelpRequest) => void;
   onRespond: (request: HelpRequest) => void;
+  onCancel: (request: HelpRequest) => void;
 }
 
 const PendingRequestsSection: React.FC<PendingRequestsSectionProps> = ({
   requests,
   onViewDetails,
   onRespond,
+  onCancel,
 }) => {
   const pendingRequests = requests.filter(req => req.status === 'pending');
   
@@ -34,6 +36,7 @@ const PendingRequestsSection: React.FC<PendingRequestsSectionProps> = ({
               request={request}
               onViewDetails={onViewDetails}
               onRespond={onRespond}
+              onCancel={onCancel}
             />
           ))
         ) : (
