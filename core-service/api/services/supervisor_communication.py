@@ -2,6 +2,8 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional, Callable
 from database import crud
+from database.session import SessionLocal
+from database.models import Customer
 
 logger = logging.getLogger("services.supervisor_response")
 
@@ -13,6 +15,7 @@ def notify_customer_of_resolution(
 ) -> bool:
     """
     Notify the customer about the resolution of their help request via simulated text.
+    Creates a followup record to track the notification.
     
     Args:
         help_request_id: The ID of the resolved help request
@@ -39,8 +42,6 @@ def notify_customer_of_resolution(
         customer_id = help_request.customer_id
         
         # Get customer details for enhanced notification
-        from database.session import SessionLocal
-        from database.models import Customer
         
         session = SessionLocal()
         try:
@@ -49,6 +50,30 @@ def notify_customer_of_resolution(
             customer_phone = customer.phone_e164 if customer and customer.phone_e164 else "No phone on file"
         finally:
             session.close()
+        
+        # Create notification message content
+        text_message = f"Hi {customer_name}! We've got an answer to your question: '{customer_question}'. Here's the response: {answer_text}. Thanks for your patience!"
+        
+        # Create followup record for customer notification tracking
+        notification_payload = {
+            "message": text_message,
+            "customer_name": customer_name,
+            "customer_phone": customer_phone,
+            "original_question": customer_question,
+            "answer_text": answer_text,
+            "responder_id": responder_id,
+            "help_request_id": help_request_id
+        }
+        
+        followup_data = {
+            "help_request_id": help_request_id,
+            "customer_id": customer_id,
+            "channel": "customer_sms",
+            "payload": notification_payload,
+            "status": "sent"
+        }
+        
+        followup = crud.create_followup(followup_data)
         
         # Send simulated text notification to customer
         notification_logger.info("\n" + "="*80 +
@@ -59,8 +84,8 @@ def notify_customer_of_resolution(
                                 f"\n❓  Original Question: {customer_question}" +
                                 f"\n✅  Resolution Answer: {answer_text}" +
                                 f"\n👨‍💼  Resolved by: {responder_id}" +
-                                f"\n💬  Text Message: Hi {customer_name}! We've got an answer to your question: '{customer_question}'. " +
-                                f"Here's the response: {answer_text}. Thanks for your patience!" +
+                                f"\n💬  Text Message: {text_message}" +
+                                f"\n🗃️  Followup Record: {followup.id if followup else 'Failed to create'}" +
                                 "\n" + "="*80)
         
         return True
@@ -97,7 +122,7 @@ def create_supervisor_notification(help_request_id: str) -> Optional[str]:
         
         # Create the supervisor notification payload
         notification_payload = {
-            "message": f"Hey, I need help answering {customer_question}",
+            "message": f"Hey, I need help answering: {customer_question}",
             "help_request_id": help_request_id,
             "customer_id": str(customer_id),
             "question": customer_question
@@ -124,66 +149,3 @@ def create_supervisor_notification(help_request_id: str) -> Optional[str]:
     except Exception as e:
         logger.error(f"Error creating supervisor notification for help request {help_request_id}: {e}")
         return None
-
-
-# Legacy functions - kept for backward compatibility during transition
-async def simulate_text_supervisor(help_request_id: str) -> None:
-    """
-    DEPRECATED: Legacy function that logs supervisor texts.
-    Use create_supervisor_notification instead for new implementations.
-    """
-    try:
-        # Fetch the help request details
-        help_request_data = await asyncio.to_thread(
-            crud.get_help_request_with_answer, 
-            help_request_id
-        )
-        
-        if not help_request_data or not help_request_data.get("help_request"):
-            logger.error(f"Help request {help_request_id} not found for supervisor text")
-            return
-        
-        help_request = help_request_data["help_request"]
-        customer_question = help_request.question_text
-        customer_id = help_request.customer_id
-        
-        logger.info("\n" + "="*60 +
-                   f"\n📱  TEXTING SUPERVISOR" +
-                   f"\n📋  Help Request ID: {help_request_id}" +
-                   f"\n👤  Customer ID: {customer_id}" +
-                   f"\n❓  Customer Question: {customer_question}" +
-                   f"\n💬  Text Message: Hey! A customer needs help with: '{customer_question}'. Can you provide an answer?" +
-                   "\n" + "="*60)
-        
-    except Exception as e:
-        logger.error(f"Error simulating text to supervisor for help request {help_request_id}: {e}")
-        raise
-
-
-def text_supervisor_sync(help_request_id: str) -> None:
-    """
-    DEPRECATED: Legacy synchronous wrapper for supervisor text simulation.
-    Use create_supervisor_notification instead for new implementations.
-    """
-    try:
-        # Fetch the help request details synchronously
-        help_request_data = crud.get_help_request_with_answer(help_request_id)
-        
-        if not help_request_data or not help_request_data.get("help_request"):
-            logger.error(f"Help request {help_request_id} not found for supervisor text")
-            return
-        
-        help_request = help_request_data["help_request"]
-        customer_question = help_request.question_text
-        customer_id = help_request.customer_id
-        
-        logger.info("\n" + "="*60 +
-                   f"\n📱  TEXTING SUPERVISOR" +
-                   f"\n📋  Help Request ID: {help_request_id}" +
-                   f"\n👤  Customer ID: {customer_id}" +
-                   f"\n❓  Customer Question: {customer_question}" +
-                   f"\n💬  Text Message: Hey! A customer needs help with: '{customer_question}'. Can you provide an answer?" +
-                   "\n" + "="*60)
-        
-    except Exception as e:
-        logger.error(f"Error simulating text to supervisor for help request {help_request_id}: {e}")
