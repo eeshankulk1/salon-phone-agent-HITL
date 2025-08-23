@@ -89,10 +89,10 @@ cp .env.example .env
 # Edit .env and set DATABASE_URL, POSTGRES_*, OPENAI_API_KEY, DEEPGRAM_API_KEY, CARTESIA_API_KEY, etc.
 ```
 
-3) Start database stack from the repo root. The database is needed for both the agent and the backend:
+3) Start database stack from the repo root. The database is needed for both the agent and the backend. This will also start up the cron job responsible for updating expired rows:
 ```bash
 docker compose up -d
-# Postgres: localhost:${DB_PORT}  |  Adminer: http://localhost:8080
+# Postgres: localhost:${DB_PORT}  |  Adminer (DB visualizer) http://localhost:8080
 ```
 
 4) Install dashboard dependencies:
@@ -102,7 +102,7 @@ npm install
 cd ..
 ```
 
-5) OptionalL install phone interface dependencies:
+5) Optional install phone interface dependencies:
 ```bash
 cd mobile
 npm install
@@ -131,13 +131,13 @@ npm start
 ```bash
 cd agent
 source .venv/bin/activate
-# defauly start method, requires the phone interface setup and running: 
+# default start method, requires the phone interface setup and running: 
 python main.py start
 # alternative option, will start the voice agent in your console, with logs for extra info:
 python main.py console
 ```
 
-- Mock phone call application (required for python -m agent start):
+- Mock phone call application (required for python main.py start):
 ```bash
 cd mobile
 npm run build
