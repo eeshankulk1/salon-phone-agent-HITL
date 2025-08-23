@@ -43,10 +43,6 @@ async def entrypoint(ctx: agents.JobContext):
         # In production, you might extract phone number from SIP trunk or other metadata
     )
     
-    # logger.info("\n" + "="*60 +
-    #             "\n🚀  CALL HAS BEGUN" +
-    #             f"\n📞  A customer is now connected to Beauty Palace {customer.display_name}" +
-    #             "\n" + "="*60)
     
     session = AgentSession(
         stt=deepgram.STT(model="nova-3", language="multi"),
