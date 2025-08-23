@@ -1,8 +1,10 @@
 # LiveKit Salon Agent
 
 Monorepo containing:
-- Core backend service (FastAPI) and the salon voice agent code in `core-service`
+- Core backend service (FastAPI) in  `core-service`
+- Salon agent in `agent`
 - Supervisor dashboard (React) in `supervisor-dashboard`
+- Agent interaction frontend in  `mobile`
 - Postgres + Adminer via Docker Compose in the repo root
 
 ---
