@@ -1,4 +1,4 @@
-# Frontdesk Assessment
+# LiveKit Salon Agent
 
 Monorepo containing:
 - Core backend service (FastAPI) and the salon voice agent code in `core-service`
